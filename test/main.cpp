@@ -12,18 +12,24 @@
 
 int main(){
   Maze maze(WallData);
-  uint32_t po = maze.getWall(31,31);
+  Node node;
+  auto poi = node.search_neighbor_node(62);
+  while(!poi.empty()){
+    NodeInfo hoge = poi.top();
+    hoge.debug_info();
+    poi.pop();
+  }
+  poi = node.search_neighbor_node(66);
+  while(!poi.empty()){
+    NodeInfo hoge = poi.top();
+    hoge.debug_info();
+    poi.pop();
+  }
+
+  uint32_t po = maze.getWall(0,0);
   printf("%x\n", po);
-  po = maze.getWall(31,30);
-  printf("%x\n", po);
+  maze.updateWall(0,0, 0xff);
   po = maze.getWall(0,0);
-  printf("%x\n", po);
-  po = maze.getWall(31,11);
-  printf("%x\n", po);
-  po = maze.getWall(1,11);
-  printf("%x\n", po);
-
-
   return 0;
 }
 
