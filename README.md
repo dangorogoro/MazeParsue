@@ -1,4 +1,7 @@
 # MazrParsue
-a maze solver library for micromouse with Dijkstra.
+a maze solver library for micromouse
+
+## Algorithm
+Dijkstra
 
 developing
