@@ -39,6 +39,8 @@ constexpr uint32_t SOUTH_VISIBLE(int8_t x, int8_t y){return NORTH_STATE(x,y-1) +
 template<uint32_t T>
 using WallStr = std::bitset<T>;
 extern WallStr<WALL_AMOUNT> WallData;
+template<class T>
+using NodeQueue = std::priority_queue<T, std::vector<T>, std::greater<T>>;
 
 constexpr uint8_t EAST = 0x01;
 constexpr uint8_t NORTH = 0x02;
@@ -188,9 +190,10 @@ struct NodeInfo{
   public:
     uint32_t serial_number;
     float cost;
+    uint32_t mother_number;
   public:
     NodeInfo(){}
-    NodeInfo(uint32_t num, float cost_ = 0) : serial_number(num), cost(cost_){}
+    NodeInfo(uint32_t num, float cost_ = 0) : serial_number(num), cost(cost_), mother_number(serial_number){}
     inline bool operator<(const NodeInfo &obj) const { return cost < obj.cost;}
     inline bool operator>(const NodeInfo &obj) const { return cost > obj.cost;}
     std::pair<IndexVec, Direction> getIndexInfo(){
@@ -200,7 +203,20 @@ struct NodeInfo{
       return {IndexVec(x,y), dir};
     }
     void debug_info(){
-      printf("serial_number is %d, cost is %d\n", serial_number, cost);
+      printf("serial_number is %d, cost is %f\n", serial_number, cost);
+    }
+    bool isCorner() const{
+      if((serial_number % (2 * MAZE_SIZE) == (2 * MAZE_SIZE - 1)) || (serial_number % 2 == 0 &&  serial_number > WALL_AMOUNT - 2 * MAZE_SIZE))
+        return true;
+      else return false;
+    }
+    uint32_t get_my_id()const{ return serial_number;}
+    uint32_t get_mother_id()const{ return mother_number;}
+    float get_cost() const{return cost;}
+    inline bool get_wall_info() const{return WallData[serial_number * 2];}
+    inline void set_info(uint32_t mother, float cost_){
+      mother_number = mother;
+      cost = cost_;
     }
 };
 class Node{
@@ -210,30 +226,26 @@ class Node{
     Node(){clear();}
     void clear(){
       for(int i = 0; i < WALL_AMOUNT; i++){
-        node[i].cost = 0.0;
+        node[i].cost = 10000.0;
         node[i].serial_number = i;
+        node[i].mother_number = i;
       }
     }
-    std::priority_queue<NodeInfo> search_neighbor_node(uint32_t present_number){
-      std::priority_queue<NodeInfo> list;
-      //NORTH
-      if(present_number % 2 == 0){
-        //NORTH
-        if(present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
-          list.push(node[present_number + 2 * MAZE_SIZE]);
-          //NW
-          if(present_number % (2 * MAZE_SIZE) != 0) list.push(node[present_number + 2 * MAZE_SIZE - 1]);
-          //NE
-          if(present_number % (2 * MAZE_SIZE) != 2 * (MAZE_SIZE - 1)) list.push(node[present_number + 2 * MAZE_SIZE +1]);
-        //SOUTH EAST
-        if(present_number % (2 * MAZE_SIZE) != 2 * (MAZE_SIZE - 1)) list.push(node[present_number + 1]);
-        //SOUTH
-        if(present_number >= (2 * MAZE_SIZE))  list.push(node[present_number -  2 * MAZE_SIZE]);
-        //SW
-        if(present_number % (2 * MAZE_SIZE) != 0) list.push(node[present_number - 1]);
-        }
-      }
-      return list;
+    //std::priority_queue<NodeInfo> search_neighbor_node(uint32_t serial_number);
+    NodeQueue<NodeInfo> search_neighbor_node(NodeInfo node){
+      return search_neighbor_node(node.get_my_id());
     }
+    NodeQueue<NodeInfo> search_neighbor_node(uint32_t serial_number);
+    void start_edge_map(uint32_t start_id, uint32_t end_id);
+    NodeQueue<NodeInfo> check_queue_quality(NodeQueue<NodeInfo>);
+    NodeQueue<NodeInfo> updateQueue(NodeQueue<NodeInfo> node_queue, uint32_t id);
+    void updateNodeInfo(NodeInfo target_node, bool force_flag = false);
+    void updateNodeInfo(NodeQueue<NodeInfo> node_queue, bool force_flag = false);
+    NodeQueue<NodeInfo> expandQueue(NodeQueue<NodeInfo> src_queue, NodeQueue<NodeInfo>dst_queue);
+    NodeQueue<NodeInfo> queueTask(uint32_t start_id);
+    
+    NodeInfo get_node(uint32_t num) const {return node[num];}
 };
+void node_debug(NodeQueue<NodeInfo> poi);
+bool node_check(NodeQueue<NodeInfo> node_queue, uint32_t);
 #endif
