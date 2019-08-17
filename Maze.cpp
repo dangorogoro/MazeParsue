@@ -69,55 +69,55 @@ void Maze::updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite){
     wall_pointer->set(WEST_VISIBLE(x,y), 1);
   }
 }
-/*
-std::priority_queue<NodeInfo> Node::search_neighbor_node(uint32_t present_number){
-  std::priority_queue<NodeInfo> list;
+NodeQueue<NodeIndex> Node::search_neighbor_node(uint32_t present_number){
+  NodeQueue<NodeIndex> node_queue;
   //Also return the edge node
   //->To check corner
   //NORTH
   if(present_number % 2 == 0){
     if(present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
       //NORTH
-      list.push(node[present_number + 2 * MAZE_SIZE);
+      node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE));
       //NE
-      list.push(node[present_number + 2 * MAZE_SIZE + 1);
+      node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE + 1));
       //NW
       if(present_number % (2 * MAZE_SIZE) != 0)
-        list.push(node[present_number + 2 * MAZE_SIZE - 1);
+        node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE + 1));
     }
     if(present_number > 2 * MAZE_SIZE - 1){
       //SOUTH
-      list.push(node[present_number - 2 * MAZE_SIZE);
+      node_queue.push(NodeIndex(node, present_number - 2 * MAZE_SIZE));
     }
     //SE
-    list.push(node[present_number + 1);
+    node_queue.push(NodeIndex(node, present_number + 1));
     //SW
-    if(MAZE_SIZE % (2 * MAZE_SIZE) != 0)
-      list.push(node[present_number - 1);
+    if(present_number % (2 * MAZE_SIZE) != 0)
+      node_queue.push(NodeIndex(node, present_number - 1));
   }
   //EAST
   else{
     if(present_number % (2 * MAZE_SIZE) != 2 * MAZE_SIZE - 1){
       //EAST
-      list.push(node[present_number + 2);
+      node_queue.push(NodeIndex(node, present_number + 2));
       //NE
-      list.push(node[present_number + 1);
+      node_queue.push(NodeIndex(node, present_number + 1));
       //SE
       if(present_number > 2 * MAZE_SIZE - 1)
-        list.push(node[present_number + 1 - 2 * MAZE_SIZE);
+        node_queue.push(NodeIndex(node, present_number + 1 - 2 * MAZE_SIZE));
     }
+    //NW
+    node_queue.push(NodeIndex(node, present_number - 1));
     if(present_number % 64 != 1){
       //WEST
-      list.push(node[present_number - 2);
-      //NW
-      list.push(node[present_number - 1);
-      if(present_number > 2 * MAZE_SIZE - 1)
-        list.push(node[present_number - 1 - 2 * MAZE_SIZE);
+      node_queue.push(NodeIndex(node, present_number - 2));
     }
+    //SW
+    if(present_number > 2 * MAZE_SIZE - 1)
+      node_queue.push(NodeIndex(node, present_number - 1 - 2 * MAZE_SIZE));
   }
-  return list;
+  return check_queue_quality(node_queue);
 }
-*/
+/*
 NodeQueue<NodeInfo> Node::search_neighbor_node(uint32_t present_number){
   NodeQueue<NodeInfo> node_queue;
   //Also return the edge node
@@ -166,6 +166,7 @@ NodeQueue<NodeInfo> Node::search_neighbor_node(uint32_t present_number){
   }
   return check_queue_quality(node_queue);
 }
+*/
 void Node::start_edge_map(uint32_t start_id, uint32_t end_id){
   node[start_id].set_info(0, 0.0f);
   //auto node_queue = queueTask(start_id);
@@ -174,12 +175,12 @@ void Node::start_edge_map(uint32_t start_id, uint32_t end_id){
   bool flag = false;
   while(flag == false){
     while(!node_queue.empty()){
-      NodeInfo top_node = node_queue.top();
-      printf("node id is %d\n", top_node.get_my_id());
+      NodeIndex top_index = node_queue.top();
+      printf("node id is %d\n", top_index.get_my_id());
       node_queue.pop();
 
-      auto new_queue = search_neighbor_node(top_node.get_my_id());
-      new_queue = updateQueue(new_queue, top_node.get_my_id());
+      auto new_queue = search_neighbor_node(top_index.get_my_id());
+      new_queue = updateQueue(new_queue, top_index.get_my_id());
 
       node_queue = expandQueue(node_queue, new_queue);
       flag = node_check(node_queue, end_id);
@@ -190,10 +191,10 @@ void Node::start_edge_map(uint32_t start_id, uint32_t end_id){
     }
   }
 }
-NodeQueue<NodeInfo> Node::check_queue_quality(NodeQueue<NodeInfo> target_queue){
-  NodeQueue<NodeInfo> que;
+NodeQueue<NodeIndex> Node::check_queue_quality(NodeQueue<NodeIndex> target_queue){
+  NodeQueue<NodeIndex> que;
   while(!target_queue.empty()){
-    NodeInfo top_node = target_queue.top();
+    NodeIndex top_node = target_queue.top();
     uint32_t top_id = top_node.get_my_id();
     printf("top_id is %d\n", top_id);
     if(node[top_id].get_wall_info() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() > 5000){
@@ -205,6 +206,7 @@ NodeQueue<NodeInfo> Node::check_queue_quality(NodeQueue<NodeInfo> target_queue){
   printf("check finished\n");
   return que;
 }
+/*
 void Node::updateNodeInfo(NodeQueue<NodeInfo> node_queue, bool force_flag){
   while(!node_queue.empty()){
     NodeInfo top_node = node_queue.top();
@@ -223,29 +225,30 @@ void Node::updateNodeInfo(NodeInfo target_node, bool force_flag){
   else
     node[id] = target_node;
 }
-NodeQueue<NodeInfo> Node::updateQueue(NodeQueue<NodeInfo> node_queue, uint32_t mother_id){
+*/
+NodeQueue<NodeIndex> Node::updateQueue(NodeQueue<NodeIndex> node_queue, uint32_t mother_id){
   //update cost of NodeInfo
   //set mother id to node in thr priority queue
-  NodeQueue<NodeInfo> return_queue;
-  float cost = 0.0;
+  NodeQueue<NodeIndex> return_queue;
+  float cost = 0.1;
   while(!node_queue.empty()){
-    cost += 0.1;
-    NodeInfo top_node = node_queue.top();
+    //cost += 0.1;
+    NodeIndex top_index = node_queue.top();
     /* check present cost to determine whether to update
      *
      *
      */
-    if(node[top_node.get_my_id()].get_cost() > node[mother_id].get_cost() + cost){
-      top_node.set_info(mother_id, node[mother_id].get_cost() + cost);
-      node[top_node.get_my_id()] = top_node;
-      return_queue.push(top_node);
-      printf("serial_number %d, cost %f mother %d\n", top_node.get_my_id(), top_node.get_cost(), top_node.get_mother_id());
+    if(top_index.get_cost() > node[mother_id].get_cost() + cost){
+      node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost);
+      //node[top_index.get_my_id()] = top_index.get_node();
+      return_queue.push(top_index);
+      printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
     node_queue.pop();
   }
   return return_queue;
 }
-NodeQueue<NodeInfo> Node::expandQueue(NodeQueue<NodeInfo> src_queue, NodeQueue<NodeInfo>dst_queue){
+NodeQueue<NodeIndex> Node::expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex> dst_queue){
   while(!dst_queue.empty()){
     src_queue.push(dst_queue.top());
     dst_queue.pop();
@@ -253,6 +256,7 @@ NodeQueue<NodeInfo> Node::expandQueue(NodeQueue<NodeInfo> src_queue, NodeQueue<N
   return src_queue;
 }
 
+/*
 NodeQueue<NodeInfo> Node::queueTask(uint32_t start_id){
   //updateNodeInfo(node_queue);
   auto node_queue = search_neighbor_node(start_id);
@@ -260,6 +264,7 @@ NodeQueue<NodeInfo> Node::queueTask(uint32_t start_id){
   node_queue = updateQueue(node_queue, start_id);
   return node_queue;
 }
+*/
 void node_debug(NodeQueue<NodeInfo> poi){
   printf("Node Debug\n");
   while(!poi.empty()){
@@ -268,9 +273,9 @@ void node_debug(NodeQueue<NodeInfo> poi){
     poi.pop();
   }
 }
-bool node_check(NodeQueue<NodeInfo> node_queue, uint32_t end_id){
+bool node_check(NodeQueue<NodeIndex> node_queue, uint32_t end_id){
   while(!node_queue.empty()){
-    NodeInfo hoge = node_queue.top();
+    NodeIndex hoge = node_queue.top();
     if(hoge.get_my_id() == end_id)
       return true;
     node_queue.pop();

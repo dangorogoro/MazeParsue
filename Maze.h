@@ -219,6 +219,18 @@ struct NodeInfo{
       cost = cost_;
     }
 };
+struct NodeIndex{
+  private:
+    //std::pair<uint32_t, float> index;
+    NodeInfo* node_pointer;
+    uint32_t index;
+  public:
+    NodeIndex(NodeInfo* node, uint32_t index_) : node_pointer(node), index(index_){}
+    inline bool operator<(const NodeIndex &obj) const{return node_pointer[index].get_cost() < obj.get_cost();}
+    inline bool operator>(const NodeIndex &obj) const{return node_pointer[index].get_cost() > obj.get_cost();}
+    float get_cost()const {return node_pointer[index].get_cost();}
+    uint32_t get_my_id()const {return index;}
+};
 class Node{
   private:
     NodeInfo node[WALL_AMOUNT];
@@ -231,7 +243,24 @@ class Node{
         node[i].mother_number = i;
       }
     }
-    //std::priority_queue<NodeInfo> search_neighbor_node(uint32_t serial_number);
+    NodeQueue<NodeIndex> search_neighbor_node(NodeIndex node){
+      return search_neighbor_node(node.get_my_id());
+    }
+    NodeQueue<NodeIndex> search_neighbor_node(uint32_t serial_number);
+    void start_edge_map(uint32_t start_id, uint32_t end_id);
+    NodeQueue<NodeIndex> check_queue_quality(NodeQueue<NodeIndex>);
+    NodeQueue<NodeIndex> updateQueue(NodeQueue<NodeIndex> node_queue, uint32_t id);
+    void updateNodeIndex(NodeIndex target_node, bool force_flag = false);
+    void updateNodeIndex(NodeQueue<NodeIndex> node_queue, bool force_flag = false);
+    NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);
+    //NodeQueue<NodeIndex> queueTask(uint32_t start_id);
+    
+    NodeInfo get_node(uint32_t num) const {return node[num];}
+};
+void node_debug(NodeQueue<NodeIndex> poi);
+bool node_check(NodeQueue<NodeIndex> node_queue, uint32_t);
+#endif
+#if 0
     NodeQueue<NodeInfo> search_neighbor_node(NodeInfo node){
       return search_neighbor_node(node.get_my_id());
     }
