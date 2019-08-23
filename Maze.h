@@ -50,6 +50,11 @@ constexpr uint8_t DONE_EAST = 0x10;
 constexpr uint8_t DONE_NORTH = 0x20;
 constexpr uint8_t DONE_WEST = 0x40;
 constexpr uint8_t DONE_SOUTH = 0x80;
+constexpr uint8_t NORTH_EAST = 0x03;
+constexpr uint8_t NORTH_WEST = 0x06;
+constexpr uint8_t SOUTH_EAST = 0x09;
+constexpr uint8_t SOUTH_WEST = 0x0c;
+
 union __attribute__ ((__packed__)) Direction {
   public:
     uint8_t byte;
@@ -174,7 +179,7 @@ class Maze{
     Direction getEAST(int8_t x, int8_t y);
     Direction getWEST(int8_t x, int8_t y);
     Direction getSOUTH(int8_t x, int8_t y);
-    inline void updateWall(IndexVec &index, Direction dir, bool forceWrite = true){ updateWall(index.x, index.y, dir, forceWrite);}
+    inline void updateWall(IndexVec index, Direction dir, bool forceWrite = true){ updateWall(index.x, index.y, dir, forceWrite);}
     void updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite = true);
     void clear(){
       wall_pointer->reset();
@@ -188,12 +193,12 @@ class Maze{
 };
 struct NodeInfo{
   public:
-    uint32_t serial_number;
+    int32_t serial_number;
     float cost;
-    uint32_t mother_number;
+    int32_t mother_number;
   public:
     NodeInfo(){}
-    NodeInfo(uint32_t num, float cost_ = 0) : serial_number(num), cost(cost_), mother_number(serial_number){}
+    NodeInfo(int32_t num, float cost_ = 0) : serial_number(num), cost(cost_), mother_number(serial_number){}
     inline bool operator<(const NodeInfo &obj) const { return cost < obj.cost;}
     inline bool operator>(const NodeInfo &obj) const { return cost > obj.cost;}
     std::pair<IndexVec, Direction> getIndexInfo(){
@@ -210,11 +215,11 @@ struct NodeInfo{
         return true;
       else return false;
     }
-    uint32_t get_my_id()const{ return serial_number;}
-    uint32_t get_mother_id()const{ return mother_number;}
+    int32_t get_my_id()const{ return serial_number;}
+    int32_t get_mother_id()const{ return mother_number;}
     float get_cost() const{return cost;}
     inline bool get_wall_info() const{return WallData[serial_number * 2];}
-    inline void set_info(uint32_t mother, float cost_){
+    inline void set_info(int32_t mother, float cost_){
       mother_number = mother;
       cost = cost_;
     }
@@ -223,13 +228,13 @@ struct NodeIndex{
   private:
     //std::pair<uint32_t, float> index;
     NodeInfo* node_pointer;
-    uint32_t index;
+    int32_t index;
   public:
-    NodeIndex(NodeInfo* node, uint32_t index_) : node_pointer(node), index(index_){}
+    NodeIndex(NodeInfo* node, int32_t index_) : node_pointer(node), index(index_){}
     inline bool operator<(const NodeIndex &obj) const{return node_pointer[index].get_cost() < obj.get_cost();}
     inline bool operator>(const NodeIndex &obj) const{return node_pointer[index].get_cost() > obj.get_cost();}
     float get_cost()const {return node_pointer[index].get_cost();}
-    uint32_t get_my_id()const {return index;}
+    int32_t get_my_id()const {return index;}
 };
 class Node{
   private:
@@ -246,35 +251,20 @@ class Node{
     NodeQueue<NodeIndex> search_neighbor_node(NodeIndex node){
       return search_neighbor_node(node.get_my_id());
     }
-    NodeQueue<NodeIndex> search_neighbor_node(uint32_t serial_number);
-    void start_edge_map(uint32_t start_id, uint32_t end_id);
+    NodeQueue<NodeIndex> search_neighbor_node(int32_t serial_number);
+    void start_edge_map(int32_t start_id, int32_t end_id);
+    NodeQueue<NodeIndex> getPathQueue(int32_t start_id, int32_t end_id);
     NodeQueue<NodeIndex> check_queue_quality(NodeQueue<NodeIndex>);
-    NodeQueue<NodeIndex> updateQueue(NodeQueue<NodeIndex> node_queue, uint32_t id);
+    NodeQueue<NodeIndex> updateQueue(NodeQueue<NodeIndex> node_queue, int32_t id);
     void updateNodeIndex(NodeIndex target_node, bool force_flag = false);
     void updateNodeIndex(NodeQueue<NodeIndex> node_queue, bool force_flag = false);
     NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);
-    //NodeQueue<NodeIndex> queueTask(uint32_t start_id);
+    //NodeQueue<NodeIndex> queueTask(int32_t start_id);
     
-    NodeInfo get_node(uint32_t num) const {return node[num];}
+    NodeInfo get_node(int32_t num) const {return node[num];}
 };
 void node_debug(NodeQueue<NodeIndex> poi);
-bool node_check(NodeQueue<NodeIndex> node_queue, uint32_t);
-#endif
-#if 0
-    NodeQueue<NodeInfo> search_neighbor_node(NodeInfo node){
-      return search_neighbor_node(node.get_my_id());
-    }
-    NodeQueue<NodeInfo> search_neighbor_node(uint32_t serial_number);
-    void start_edge_map(uint32_t start_id, uint32_t end_id);
-    NodeQueue<NodeInfo> check_queue_quality(NodeQueue<NodeInfo>);
-    NodeQueue<NodeInfo> updateQueue(NodeQueue<NodeInfo> node_queue, uint32_t id);
-    void updateNodeInfo(NodeInfo target_node, bool force_flag = false);
-    void updateNodeInfo(NodeQueue<NodeInfo> node_queue, bool force_flag = false);
-    NodeQueue<NodeInfo> expandQueue(NodeQueue<NodeInfo> src_queue, NodeQueue<NodeInfo>dst_queue);
-    NodeQueue<NodeInfo> queueTask(uint32_t start_id);
-    
-    NodeInfo get_node(uint32_t num) const {return node[num];}
-};
-void node_debug(NodeQueue<NodeInfo> poi);
-bool node_check(NodeQueue<NodeInfo> node_queue, uint32_t);
+bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id);
+Direction node_relation(NodeIndex src_index, NodeIndex dst_index);
+
 #endif
