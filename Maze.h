@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <vector>
 #include <queue>
+#include <iterator>
 #include "Parsue_Conf.h"
 
 //std::bitset<((2 * MAZE_SIZE * MAZE_SIZE) - 2 * MAZE_SIZE) * 2> WallData;
@@ -29,12 +30,14 @@ constexpr uint32_t WEST_STATE(int8_t x, int8_t y){return EAST_STATE(x-1,y);}
 constexpr uint32_t WEST_VISIBLE(int8_t x, int8_t y){return EAST_STATE(x-1,y) + 1;}
 constexpr uint32_t SOUTH_STATE(int8_t x, int8_t y){return NORTH_STATE(x,y-1);}
 constexpr uint32_t SOUTH_VISIBLE(int8_t x, int8_t y){return NORTH_STATE(x,y-1) + 1;}
+/*
 #define EAST_STATE(x,y) (NORTH_STATE(x,y) + 2)
 #define EAST_VISIBLE(x,y) (EAST_STATE(x,y) + 1)
 #define SOUTH_STATE(x,y) (NORTH_STATE(x,y-1))
 #define SOUTH_VISIBLE(x,y) (NORTH_VISIBLE(x,y-1))
 #define WEST_STATE(x,y) (EAST_STATE(x-1,y))
 #define WEST_VISIBLE(x,y) (EAST_VISIBLE(x-1,y))
+*/
 
 template<uint32_t T>
 using WallStr = std::bitset<T>;
@@ -181,6 +184,9 @@ class Maze{
     Direction getSOUTH(int8_t x, int8_t y);
     inline void updateWall(IndexVec index, Direction dir, bool forceWrite = true){ updateWall(index.x, index.y, dir, forceWrite);}
     void updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite = true);
+    void printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE] = nullptr);
+    void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
+    void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
       for(int i=0; i < MAZE_SIZE; i++){

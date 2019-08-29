@@ -69,6 +69,71 @@ void Maze::updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite){
     wall_pointer->set(WEST_VISIBLE(x,y), 1);
   }
 }
+void Maze::printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE]){
+	bool printValueOn = false;
+	if (value) printValueOn = true;
+
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
+		for (int x=0;x<MAZE_SIZE;x++) {
+			std::printf("+");
+			if(getWall(x, y).bits.North) std::printf("----");
+			else std::printf("    ");
+		}
+		std::printf("+\r\n");
+
+		for (int x=0;x<MAZE_SIZE;x++) {
+			if (getWall(x, y).bits.West) std::printf("|");
+			else std::printf(" ");
+			std::printf(" ");
+			if (printValueOn) std::printf("%3u", value[y][x]);
+			else std::printf("   ");
+		}
+		std::printf("|\r\n");
+	}
+	for (int i=0;i<MAZE_SIZE;i++) {
+		std::printf("-----");
+	}
+	std::printf("+\r\n");
+}
+
+
+
+void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
+	bool printValueOn = false;
+	if (value) printValueOn = true;
+
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
+		for (int x=0;x<MAZE_SIZE;x++) {
+			std::printf("+");
+			if(getWall(x,y).bits.North) std::printf("----");
+			else std::printf("    ");
+		}
+		std::printf("+\r\n");
+
+		for (int x=0;x<MAZE_SIZE;x++) {
+			if (getWall(x, y).bits.West) std::printf("|");
+			else std::printf(" ");
+			std::printf("  ");
+			if (printValueOn){
+				if (value[y][x]) std::printf("* ");
+				else std::printf("  ");
+			}
+			else std::printf("   ");
+		}
+		std::printf("|\r\n");
+	}
+	for (int i=0;i<MAZE_SIZE;i++) {
+		std::printf("-----");
+	}
+	std::printf("+\r\n");
+}
+void Maze::loadFromArray(uint8_t* array){
+  uint32_t data_size = 256;
+  for(size_t i = 0; i < data_size; i++){
+      updateWall(i % (MAZE_SIZE / 2), MAZE_SIZE / 2  - i / (MAZE_SIZE / 2) - 1, Direction(array[i]));
+  }
+}
+
 NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number){
   NodeQueue<NodeIndex> node_queue;
   //Also return the edge node
