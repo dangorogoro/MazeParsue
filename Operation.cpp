@@ -13,7 +13,7 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
   dir_list.push_back(fake_queue);
   dir_list.push_back(fake_queue);
   OperationList opList;
-  Operation present_op;
+  Operation present_op(Operation::FORWARD);
   for(size_t i = 0;  i < dir_list.size(); i++){
     if(i < dir_list.size() - 3){
       Direction present_dir = dir_list[i];
@@ -38,11 +38,11 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
   std::vector<Direction> dir_list;
   node_queue.pop();
   while(!node_queue.empty()){
-    printf("last_node id is %d\n", last_node.get_my_id());
+    //printf("last_node id is %d\n", last_node.get_my_id());
     NodeIndex present_node = node_queue.top();
-    printf("present_node id is %d\n", present_node.get_my_id());
+    //printf("present_node id is %d\n", present_node.get_my_id());
     Direction dir = node_relation(last_node, present_node);
-    printf("dir is 0x%x\n", dir);
+    //printf("dir is 0x%x\n", dir);
     dir_list.push_back(dir);
     last_node = present_node;
     node_queue.pop();
@@ -50,30 +50,48 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
   return dir_list;
 }
 
-Operation nextOperation(Operation present_op, Direction present_dir, Direction next_dir, Direction future_dir){
+Operation nextOperation(Operation present_op, Direction last_dir, Direction present_dir){
+  if(bit_count(last_dir) == 1 && bit_count(present_dir) == 1)
+    return Operation(Operation::FORWARD, 1);
+  Direction first_dir = (last_dir & present_dir);
+  Direction second_dir = present_dir - first_dir;
+  Operation return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_90);
+  return return_op;
+}
+
+Operation nextOperation(Operation present_op, Direction present_dir, Direction next_dir, Direction future_dir, bool diagonal){
   Operation return_op;
+  //printf("present dir is 0x%x\n", present_dir);
+  //printf("next dir is 0x%x\n", next_dir);
+  //printf("future dir is 0x%x\n", future_dir);
   //FORWARD
-  if((present_dir | future_dir) == next_dir && bit_count(present_dir) == 1) return_op = Operation(Operation::FORWARD, 1);
+  if(((present_dir | future_dir) == next_dir) || (present_dir ==  next_dir) && bit_count(present_dir) == 1){
+    return_op = Operation(Operation::FORWARD, 1);
+    //printf("FORWARD\n");
+  }
   else{
     //TURN START
-    if(present_op.op == Operation::FORWARD){
+    if(present_op.op == Operation::FORWARD || present_op.op == Operation::BACK_180){
       //TURN 90
-      if(bit_count(present_dir & next_dir) == 1){
-        printf("TURN_90\n");
-        Direction first_dir = present_dir - next_dir;
-        Direction second_dir = present_dir & next_dir;
+      if(bit_count(present_dir & next_dir) == 1 || diagonal == false){
+        //printf("TURN_90\n");
+        //New solution!!!!!!!!!!!!!1
+        //Direction first_dir = present_dir - next_dir;
+        //Direction second_dir = present_dir & next_dir;
+        Direction first_dir = present_dir - (present_dir & next_dir);
+        Direction second_dir = present_dir - first_dir;
         return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_90);
       }
       //TURN 135
       else if(next_dir == future_dir){
-        printf("TURN_135\n");
+        //printf("TURN_135\n");
         Direction second_dir = present_dir & next_dir;
         Direction first_dir = present_dir - second_dir;
         return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_135);
       }
       //TURN180
       else{
-        printf("TURN_1k0\n");
+        //printf("TURN_180\n");
         Direction second_dir = present_dir & next_dir;
         Direction first_dir = present_dir - second_dir;
         return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_180);
@@ -86,7 +104,6 @@ Operation nextOperation(Operation present_op, Direction present_dir, Direction n
 Operation getTurnOperation(Direction first_dir, Direction second_dir, Operation::OperationType type){
   bool flag = false;  //false -> left true -> right
   Operation return_op;
-  printf("fir dir 0x%x, seco dir 0x %x\n", first_dir, second_dir);
   if(first_dir == NORTH){
     if(second_dir == EAST)  flag = true;
   }
@@ -116,4 +133,34 @@ Operation getTurnOperation(Direction first_dir, Direction second_dir, Operation:
     else return_op = Operation(Operation::TURN_RIGHT180, 1);
   }
   return return_op;
+}
+void print_operation(Operation op){
+  OperationList opList;
+  opList.push_back(op);
+  print_operation(opList);
+}
+void print_operation(OperationList runSequence){
+  printf("===============\n");
+  for(size_t i = 0;i < runSequence.size();i++){
+    if(runSequence[i].op == Operation::FORWARD) printf("FORWARD");
+    else if(runSequence[i].op == Operation::FORWARD_DIAG)  printf("FORWARD_DIAG");
+    else if(runSequence[i].op == Operation::TURN_RIGHT90) printf("TURN_RIGHT90");
+    else if(runSequence[i].op == Operation::TURN_RIGHT45)  printf("TURN_RIGHT45");
+    else if(runSequence[i].op == Operation::TURN_LEFT90) printf("TURN_LEFT90");
+    else if(runSequence[i].op == Operation::TURN_LEFT45) printf("TURN_LEFT45");
+    else if(runSequence[i].op == Operation::STOP) printf("STOP");
+    else if(runSequence[i].op == Operation::TURN_RIGHT135) printf("TURN_RIGHT135");
+    else if(runSequence[i].op == Operation::TURN_RIGHT180) printf("TURN_RIGHT180");
+    else if(runSequence[i].op == Operation::TURN_LEFT135 ) printf("TURN_LEFT135");
+    else if(runSequence[i].op == Operation::TURN_LEFT180 ) printf("TURN_LEFT135");
+    else if(runSequence[i].op == Operation::TURN_RIGHT90S) printf("TURN_RIGHT90S");
+    else if(runSequence[i].op == Operation::TURN_LEFT90S ) printf("TURN_LEFT90S");
+    else if(runSequence[i].op == Operation::V_RIGHT90     ) printf("LEFT_V90");
+    else if(runSequence[i].op == Operation::V_RIGHT90    ) printf("RIGHT_V90");
+    else if(runSequence[i].op == Operation::TURN_135     ) printf("TURN_135");
+    else if(runSequence[i].op == Operation::V_90) printf("V90");
+    else if(runSequence[i].op == Operation::TURN_45) printf("TURN_45");
+    else if(runSequence[i].op == Operation::BACK_180) printf("BACK_180");
+    printf(" -> %d\n", runSequence[i].n);
+  }
 }

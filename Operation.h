@@ -46,7 +46,8 @@ struct Operation {
     TURN_90,
     TURN_135,
     TURN_180,
-    V_90
+    V_90,
+    BACK_180
 	} OperationType;
 
 	OperationType op;
@@ -82,7 +83,10 @@ public:
 	const Operation &operator[](size_t i) const { return opList[i]; }
 };
 OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal);
-Operation nextOperation(Operation op, Direction present_dir, Direction next_dir, Direction future_dir);
+Operation nextOperation(Operation op, Direction present_dir, Direction next_dir);
+Operation nextOperation(Operation op, Direction present_dir, Direction next_dir, Direction future_dir, bool diagonal = false);
 std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue);
 Operation getTurnOperation(Direction first_dir, Direction second_dir, Operation::OperationType type);
+void print_operation(Operation op);
+void print_operation(OperationList list);
 #endif /* OPERATION_H_ */
