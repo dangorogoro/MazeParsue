@@ -5,13 +5,37 @@
 #include <list>
 #include <vector>
 #include <unistd.h>
-
 #include "Parsue_Conf.h"
 #include "Maze.h"
+#include "MazeData.h"
 #include "Operation.h"
+#include "Agent.h"
 int main(){
   Maze maze(WallData);
   Node node;
+  Agent agent(maze, node);
+  IndexVec po;
+  Direction dir;
+  dir = Data[0 + 16 * (15 - 1)];
+  agent.update(IndexVec(0,1), dir.byte | 0xf0);
+  printf("============\n");
+  po = agent.getNextIndex();
+  dir = Data[po.x + 16 *(15 - po.y)];
+  printf("wall is 0x%x\n", dir.byte);
+  agent.update(po, dir.byte | 0xf0);
+  int cnt = 0;
+  while(1){
+    cnt++;
+    if(cnt == 100) break;
+
+    printf("============\n");
+    po = agent.getNextIndex();
+    dir = Data[po.x + 16 *(15 - po.y)];
+    printf("wall is 0x%x\n", dir.byte);
+    agent.update(po, dir.byte | 0xf0);
+    usleep(2 * 1000 * 100);
+  }
+#if 0
   /*
   maze.updateWall(IndexVec(0, 2), 0xff);
   maze.updateWall(IndexVec(1, 3), SOUTH | WEST | NORTH);
@@ -26,29 +50,16 @@ int main(){
   node.start_edge_map(0,9);
   auto ans_path = node.getPathQueue(0,9);
   auto runSequence = loadPath(ans_path, 1);
-  printf("===============\n");
-  for(size_t i = 0;i < runSequence.size();i++){
-    if(runSequence[i].op == Operation::FORWARD) printf("FORWARD");
-    else if(runSequence[i].op == Operation::FORWARD_DIAG)  printf("FORWARD_DIAG");
-    else if(runSequence[i].op == Operation::TURN_RIGHT90) printf("TURN_RIGHT90");
-    else if(runSequence[i].op == Operation::TURN_RIGHT45)  printf("TURN_RIGHT45");
-    else if(runSequence[i].op == Operation::TURN_LEFT90) printf("TURN_LEFT90");
-    else if(runSequence[i].op == Operation::TURN_LEFT45) printf("TURN_LEFT45");
-    else if(runSequence[i].op == Operation::STOP) printf("STOP");
-    else if(runSequence[i].op == Operation::TURN_RIGHT135) printf("TURN_RIGHT135");
-    else if(runSequence[i].op == Operation::TURN_RIGHT180) printf("TURN_RIGHT180");
-    else if(runSequence[i].op == Operation::TURN_LEFT135 ) printf("TURN_LEFT135");
-    else if(runSequence[i].op == Operation::TURN_LEFT180 ) printf("TURN_LEFT135");
-    else if(runSequence[i].op == Operation::TURN_RIGHT90S) printf("TURN_RIGHT90S");
-    else if(runSequence[i].op == Operation::TURN_LEFT90S ) printf("TURN_LEFT90S");
-    else if(runSequence[i].op == Operation::V_RIGHT90     ) printf("LEFT_V90");
-    else if(runSequence[i].op == Operation::V_RIGHT90    ) printf("RIGHT_V90");
-    else if(runSequence[i].op == Operation::TURN_135     ) printf("TURN_135");
-    else if(runSequence[i].op == Operation::V_90) printf("V90");
-    else if(runSequence[i].op == Operation::TURN_45) printf("TURN_45");
-    printf(" -> %d\n", runSequence[i].n);
-  }
-
+#endif 
+//  maze.loadFromArray(Data);
+//  node.start_edge_map(6, 64 * 7 + 2 * 8);
+//  auto ans_path = node.getPathQueue(6, 64 * 7 + 2 * 8 - 1);
+//  maze.printWall(ans_path);
+//  auto runSequence = loadPath(ans_path, 1);
+//  print_operation(runSequence);
+//  node.start_edge_map(65, 64 * 7 + 2 * 8);
+//  ans_path = node.getPathQueue(65, 64 * 7 + 2 * 8 - 1);
+//  maze.printWall(ans_path);
 
   /*
   printf("0x%x\n", node_relation(NodeIndex(&pi, 66), NodeIndex(&pi, 67)));
