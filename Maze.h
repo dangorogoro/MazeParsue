@@ -9,8 +9,7 @@
 #include <iterator>
 #include "Parsue_Conf.h"
 
-//std::bitset<((2 * MAZE_SIZE * MAZE_SIZE) - 2 * MAZE_SIZE) * 2> WallData;
-constexpr uint32_t WALL_AMOUNT  = 2 * (2 * MAZE_SIZE * MAZE_SIZE);
+constexpr uint32_t WALL_AMOUNT = 2 * (2 * MAZE_SIZE * MAZE_SIZE);
 /*
 #define NORTH_STATE(x,y) (2 * ((MAZE_SIZE - 1) * x + y))
 #define NORTH_VISIBLE(x,y) (2 * ((MAZE_SIZE - 1) * x + y) + 1)
@@ -44,6 +43,7 @@ using WallStr = std::bitset<T>;
 extern WallStr<WALL_AMOUNT> WallData;
 template<class T>
 using NodeQueue = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+struct NodeIndex;
 
 constexpr uint8_t EAST = 0x01;
 constexpr uint8_t NORTH = 0x02;
@@ -186,6 +186,8 @@ class Maze{
     void updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite = true);
     void printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE] = nullptr);
     void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
+    void printWall(NodeQueue<NodeIndex> node_queue);
+    void printWall(std::priority_queue<int> id_queue);
     void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
@@ -200,11 +202,12 @@ class Maze{
 struct NodeInfo{
   public:
     int32_t serial_number;
-    float cost;
     int32_t mother_number;
+    uint32_t cost;
+    std::bitset<WALL_AMOUNT>* wall_pointer;
   public:
     NodeInfo(){}
-    NodeInfo(int32_t num, float cost_ = 0) : serial_number(num), cost(cost_), mother_number(serial_number){}
+    NodeInfo(int32_t num, uint32_t cost_ = 0) : serial_number(num), mother_number(serial_number), cost(cost_){}
     inline bool operator<(const NodeInfo &obj) const { return cost < obj.cost;}
     inline bool operator>(const NodeInfo &obj) const { return cost > obj.cost;}
     std::pair<IndexVec, Direction> getIndexInfo(){
@@ -223,23 +226,23 @@ struct NodeInfo{
     }
     int32_t get_my_id()const{ return serial_number;}
     int32_t get_mother_id()const{ return mother_number;}
-    float get_cost() const{return cost;}
+    uint32_t get_cost() const{return cost;}
     inline bool get_wall_info() const{return WallData[serial_number * 2];}
-    inline void set_info(int32_t mother, float cost_){
+    inline void set_info(int32_t mother, uint32_t cost_){
       mother_number = mother;
       cost = cost_;
     }
 };
 struct NodeIndex{
   private:
-    //std::pair<uint32_t, float> index;
+    //std::pair<uint32_t, uint32_t> index;
     NodeInfo* node_pointer;
     int32_t index;
   public:
     NodeIndex(NodeInfo* node, int32_t index_) : node_pointer(node), index(index_){}
     inline bool operator<(const NodeIndex &obj) const{return node_pointer[index].get_cost() < obj.get_cost();}
     inline bool operator>(const NodeIndex &obj) const{return node_pointer[index].get_cost() > obj.get_cost();}
-    float get_cost()const {return node_pointer[index].get_cost();}
+    uint32_t get_cost()const {return node_pointer[index].get_cost();}
     int32_t get_my_id()const {return index;}
 };
 class Node{
@@ -249,7 +252,7 @@ class Node{
     Node(){clear();}
     void clear(){
       for(int i = 0; i < WALL_AMOUNT; i++){
-        node[i].cost = 10000.0;
+        node[i].cost = 10000;
         node[i].serial_number = i;
         node[i].mother_number = i;
       }

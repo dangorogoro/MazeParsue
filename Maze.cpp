@@ -95,9 +95,6 @@ void Maze::printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE]){
 	}
 	std::printf("+\r\n");
 }
-
-
-
 void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
 	bool printValueOn = false;
 	if (value) printValueOn = true;
@@ -127,6 +124,75 @@ void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
 	}
 	std::printf("+\r\n");
 }
+void Maze::printWall(std::priority_queue<int> id_queue){
+
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
+		for (int x=0;x<MAZE_SIZE;x++) {
+			std::printf("+");
+      bool flag = false;
+			if(getWall(x,y).bits.North){
+        std::printf("----");
+        flag = true;
+      }
+			else{
+        auto tmp_queue = id_queue;
+        while(!tmp_queue.empty()){
+          if(tmp_queue.top() == 2 * MAZE_SIZE * y + 2 * x){
+            printf("\x1b[31m");     /* 前景色を赤に */
+            printf(" ** ");
+            printf("\x1b[39m");     /* 前景色をデフォルトに戻す */
+            flag = true;
+            break;
+          }
+          else if(tmp_queue.top() < 2 * MAZE_SIZE * y + 2 * x)  break;
+          tmp_queue.pop();
+        }
+      }
+      if(flag == false) std::printf("    ");
+		}
+		std::printf("+\r\n");
+
+		for (int x=0;x<MAZE_SIZE;x++) {
+      bool flag = false;
+			if(getWall(x, y).bits.West){
+        std::printf("|");
+        flag = true;
+      }
+			else{
+        auto tmp_queue = id_queue;
+        while(!tmp_queue.empty()){
+          if(tmp_queue.top() == 2 * MAZE_SIZE * y + 2 * x - 1){
+            printf("\x1b[31m");     /* 前景色を赤に */
+            printf("*");
+            printf("\x1b[39m");     /* 前景色をデフォルトに戻す */
+            flag = true;
+            break;
+          }
+          else if(tmp_queue.top() < 2 * MAZE_SIZE * y + 2 * x - 1)  break;
+          tmp_queue.pop();
+        }
+      }
+      if(flag == false) std::printf(" ");
+			std::printf("    ");
+		}
+		std::printf("|\r\n");
+	}
+	for (int i=0;i<MAZE_SIZE;i++) {
+		std::printf("-----");
+	}
+	std::printf("+\r\n");
+}
+void Maze::printWall(NodeQueue<NodeIndex> node_queue){
+  std::priority_queue<int> id_queue;
+  while(!node_queue.empty()){
+    id_queue.push(node_queue.top().get_my_id());
+    node_queue.pop();
+  }
+  printWall(id_queue);
+}
+
+  
+  
 void Maze::loadFromArray(uint8_t* array){
   uint32_t data_size = 256;
   for(size_t i = 0; i < data_size; i++){
@@ -183,7 +249,8 @@ NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number){
   return check_queue_quality(node_queue);
 }
 void Node::start_edge_map(int32_t start_id, int32_t end_id){
-  node[start_id].set_info(0, 0.0f);
+  clear();
+  node[start_id].set_info(start_id, 0);
   //auto node_queue = queueTask(start_id);
   auto node_queue = search_neighbor_node(start_id);
   node_queue = updateQueue(node_queue, start_id);
@@ -191,7 +258,7 @@ void Node::start_edge_map(int32_t start_id, int32_t end_id){
   while(flag == false){
     while(!node_queue.empty()){
       NodeIndex top_index = node_queue.top();
-      printf("node id is %d\n", top_index.get_my_id());
+      //printf("node id is %d\n", top_index.get_my_id());
       node_queue.pop();
 
       auto new_queue = search_neighbor_node(top_index.get_my_id());
@@ -200,12 +267,13 @@ void Node::start_edge_map(int32_t start_id, int32_t end_id){
       node_queue = expandQueue(node_queue, new_queue);
       flag = node_check(node_queue, end_id);
       if(flag == true){
-        printf("search was finished\n");
+        //printf("search was finished\n");
         break;
       }
     }
   }
 }
+
 NodeQueue<NodeIndex> Node::getPathQueue(int32_t start_id, int32_t end_id){
   NodeQueue<NodeIndex> node_queue;
   node_queue.push(NodeIndex(node, end_id));
@@ -223,14 +291,14 @@ NodeQueue<NodeIndex> Node::check_queue_quality(NodeQueue<NodeIndex> target_queue
   while(!target_queue.empty()){
     NodeIndex top_node = target_queue.top();
     int32_t top_id = top_node.get_my_id();
-    printf("top_id is %d\n", top_id);
+    //printf("top_id is %d\n", top_id);
     if(node[top_id].get_wall_info() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() > 5000){
-      printf("accept\n");
+      //printf("accept\n");
       que.push(top_node);
     }
     target_queue.pop();
   }
-  printf("check finished\n");
+  //printf("check finished\n");
   return que;
 }
 /*
@@ -257,8 +325,8 @@ NodeQueue<NodeIndex> Node::updateQueue(NodeQueue<NodeIndex> node_queue, int32_t 
   //update cost of NodeInfo
   //set mother id to node in thr priority queue
   NodeQueue<NodeIndex> return_queue;
-  float cost = 0.1;
-  printf("mother id %d\n", mother_id);
+  uint32_t cost = 1;
+  //printf("mother id %d\n", mother_id);
   while(!node_queue.empty()){
     //cost += 0.1;
     NodeIndex top_index = node_queue.top();
@@ -270,7 +338,7 @@ NodeQueue<NodeIndex> Node::updateQueue(NodeQueue<NodeIndex> node_queue, int32_t 
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost);
       //node[top_index.get_my_id()] = top_index.get_node();
       return_queue.push(top_index);
-      printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
+      //printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
     node_queue.pop();
   }
@@ -334,7 +402,7 @@ Direction node_relation(NodeIndex src_index, NodeIndex dst_index){
     //NORTH
     if(std::abs(index_diff) == 1) dir |= NORTH;
     //SOUTH
-    else if(std::abs(index_diff) == (2 * MAZE_SIZE - 1)) dir |= SOUTH;
+    else if((std::abs(index_diff) == 2 * MAZE_SIZE - 1) || (std::abs(index_diff) == 2 * MAZE_SIZE + 1))  dir |= SOUTH;
   }
   return dir;
 }
