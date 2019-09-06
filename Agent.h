@@ -17,6 +17,7 @@
  *
  *	迷路情報は外に保存をするが、Agent::updateを通して更新をしていく
  **************************************************************/
+constexpr int32_t GOAL = 64 * 7 + 2 * 8;
 class Agent {
 public:
 	typedef enum {
