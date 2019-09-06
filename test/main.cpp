@@ -23,18 +23,18 @@ int main(){
   dir = Data[po.x + 16 *(15 - po.y)];
   printf("wall is 0x%x\n", dir.byte);
   agent.update(po, dir.byte | 0xf0);
-  int cnt = 0;
   while(1){
-    cnt++;
-    if(cnt == 100) break;
 
-    printf("============\n");
     po = agent.getNextIndex();
     dir = Data[po.x + 16 *(15 - po.y)];
-    printf("wall is 0x%x\n", dir.byte);
     agent.update(po, dir.byte | 0xf0);
-    usleep(2 * 1000 * 100);
+    usleep(15 * 100 * 100);
+    if(agent.getState() == Agent::FINISHED) break;
   }
+  node.start_edge_map(0, GOAL, true);
+  auto ans_path = node.getPathQueue(0, GOAL);
+  maze.printWall(ans_path);
+  print_operation(loadPath(ans_path,1));
 #if 0
   /*
   maze.updateWall(IndexVec(0, 2), 0xff);

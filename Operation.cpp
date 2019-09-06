@@ -14,6 +14,7 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
   dir_list.push_back(fake_queue);
   OperationList opList;
   Operation present_op(Operation::FORWARD);
+  /*
   for(size_t i = 0;  i < dir_list.size(); i++){
     if(i < dir_list.size() - 3){
       Direction present_dir = dir_list[i];
@@ -31,6 +32,7 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
       }
     }
   }
+  */
   return opList;
 }
 std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
