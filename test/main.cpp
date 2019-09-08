@@ -16,25 +16,26 @@ int main(){
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  dir = Data[0 + 16 * (15 - 1)];
+  auto sampleData = AllJapan_032_2011_classic_exp_fin_16x16;
+  dir = sampleData[0 + 16 * (15 - 1)];
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
   printf("============\n");
   po = agent.getNextIndex();
-  dir = Data[po.x + 16 *(15 - po.y)];
+  dir = sampleData[po.x + 16 *(15 - po.y)];
   printf("wall is 0x%x\n", dir.byte);
   agent.update(po, dir.byte | 0xf0);
   while(1){
 
     po = agent.getNextIndex();
-    dir = Data[po.x + 16 *(15 - po.y)];
+    dir = sampleData[po.x + 16 *(15 - po.y)];
     agent.update(po, dir.byte | 0xf0);
-    usleep(15 * 100 * 100);
+    usleep(14 * 10 * 1000);
     if(agent.getState() == Agent::FINISHED) break;
   }
-  node.start_edge_map(0, GOAL, true);
+  node.startEdgeMap(0, GOAL, true);
   auto ans_path = node.getPathQueue(0, GOAL);
   maze.printWall(ans_path);
-  print_operation(loadPath(ans_path,1));
+  //print_operation(loadPath(ans_path,1));
 #if 0
   /*
   maze.updateWall(IndexVec(0, 2), 0xff);
