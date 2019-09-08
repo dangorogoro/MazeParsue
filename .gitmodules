@@ -1,0 +1,3 @@
+[submodule "tools/genMaze/mazefiles"]
+	path = tools/genMaze/mazefiles
+	url = https://github.com/micromouseonline/mazefiles.git
