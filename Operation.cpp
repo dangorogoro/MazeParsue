@@ -4,17 +4,37 @@
 
 OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
   std::vector<Direction> dir_list = generateDirectionList(node_queue);
-  auto fake_queue = dir_list.back();
+
+  OperationList opList;
+  Direction last_dir = NORTH;
+  Operation last_op(Operation::FORWARD);
+  opList.push_back(last_op);
+  for(auto itr = dir_list.begin(); itr != dir_list.end(); itr++){
+    const Direction next_dir = *itr;
+    auto next_op = nextOperation(last_op, last_dir, next_dir);
+    if(last_op.op == Operation::FORWARD && next_op.op == Operation::FORWARD){
+      auto back_vec = opList.back();
+      opList.pop_back();
+      opList.push_back(Operation(back_vec.op, back_vec.n + 1));
+    }
+    else{
+      last_op = next_op;
+      opList.push_back(next_op);
+    }
+    if(bit_count(next_dir) == 2) last_dir = next_dir - (last_dir & next_dir);
+  }
+
   /* TASK
    * TO CONSIDER DIAGONAL GOAL
    *
    * */
+  /*
+  auto fake_queue = dir_list.back();
   dir_list.push_back(fake_queue);
   dir_list.push_back(fake_queue);
   dir_list.push_back(fake_queue);
   OperationList opList;
   Operation present_op(Operation::FORWARD);
-  /*
   for(size_t i = 0;  i < dir_list.size(); i++){
     if(i < dir_list.size() - 3){
       Direction present_dir = dir_list[i];
@@ -52,7 +72,7 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
   return dir_list;
 }
 
-Operation nextOperation(Operation present_op, Direction last_dir, Direction present_dir){
+Operation nextOperation(const Operation &present_op, const Direction &last_dir, const Direction &present_dir){
   if(bit_count(last_dir) == 1 && bit_count(present_dir) == 1)
     return Operation(Operation::FORWARD, 1);
   Direction first_dir = (last_dir & present_dir);
