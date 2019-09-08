@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <list>
+#include <set>
 #include <iterator>
 #include "Parsue_Conf.h"
 
@@ -273,14 +274,16 @@ class Node{
     //NodeQueue<NodeIndex> queueTask(int32_t start_id);
     
     void startEdgeMap(int32_t start_id, int32_t end_id, bool visible = false);
+    int32_t startEdgeMap(int32_t start_id, const std::set<int32_t>& end_set, bool visible = false);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
     std::list<NodeIndex> checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible = false);
     std::list<NodeIndex> getNeighborNode(int32_t present_number, bool visible = false);
-    NodeInfo get_node(int32_t num) const {return node[num];}
+    NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 void node_debug(NodeQueue<NodeIndex> poi);
 bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id);
 bool node_check(std::list<NodeIndex> node_list, int32_t end_id);
+int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set);
 Direction node_relation(NodeIndex src_index, NodeIndex dst_index);
 
 #endif

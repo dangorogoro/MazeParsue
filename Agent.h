@@ -2,6 +2,7 @@
 #define AGENT_H_
 
 #include <list>
+#include <set>
 #include <vector>
 
 #include "Maze.h"
@@ -18,6 +19,7 @@
  *	迷路情報は外に保存をするが、Agent::updateを通して更新をしていく
  **************************************************************/
 constexpr int32_t GOAL = 64 * 7 + 2 * 8;
+extern std::set<int32_t> GOAL_LIST;
 class Agent {
 public:
 	typedef enum {
@@ -47,9 +49,16 @@ private:
   Direction presentRobotDir;
 
   Operation nextOP;
+  std::set<int32_t> goalSet;
+  int32_t present_goal;
 public:
 	Agent(Maze &_maze, Node &_node) :maze(&_maze), node(&_node), state(Agent::IDLE){ reset(); }
-
+  inline void addGoal(const int32_t &id){goalSet.insert(id);}
+  inline void deleteGoal(const int32_t &id){goalSet.erase(id);}
+  void addGoal(const std::set<int32_t>& id_list);
+  inline int32_t getGoal(){return *goalSet.begin();}
+  int32_t getNearlyGoal();
+  inline int32_t getGoalSize(){return goalSet.size();}
 	//状態をIDLEにし、path関連を全てクリアする
 	void reset();
 

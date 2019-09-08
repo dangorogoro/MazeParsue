@@ -297,6 +297,28 @@ NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number, bool vis
   }
   return check_queue_quality(node_queue, visible);
 }
+int32_t Node::startEdgeMap(int32_t start_id, const std::set<int32_t>& end_set, bool visible){
+  clear();
+  NodeQueue<NodeIndex> node_queue;
+  node[start_id].set_info(start_id, 0);
+  auto node_list = getNeighborNode(start_id, visible);
+  updateQueue(node_queue, node_list, start_id);
+  int32_t flag = node_check(node_list, end_set);
+  while(flag < 0){
+    while(!node_queue.empty()){
+      NodeIndex top_index = node_queue.top();
+      node_queue.pop();
+
+      auto new_list = getNeighborNode(top_index.get_my_id(), visible);
+      updateQueue(node_queue, new_list, top_index.get_my_id());
+      flag = node_check(new_list, end_set);
+      if(flag >= 0)  break;
+    }
+  }
+  return flag;
+}
+
+
 void Node::startEdgeMap(int32_t start_id, int32_t end_id, bool visible){
   clear();
   NodeQueue<NodeIndex> node_queue;
@@ -462,6 +484,14 @@ bool node_check(std::list<NodeIndex> node_list, int32_t end_id){
       return true;
   }
   return false;
+}
+int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set){
+  for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
+    NodeIndex hoge = *itr;
+    if(end_set.find(hoge.get_my_id()) != end_set.end())
+      return hoge.get_my_id();
+  }
+  return -1;
 }
 
 Direction node_relation(NodeIndex src_index, NodeIndex dst_index){

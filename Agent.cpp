@@ -4,7 +4,8 @@
 #include "Agent.h"
 #include "Operation.h"
 
-int32_t target_id = GOAL;
+std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8};
+//状態をIDLEにし、path関連を全てクリアする
 void Agent::reset()
 {
 	state = Agent::IDLE;
@@ -17,16 +18,49 @@ void Agent::reset()
   lastRobotDir = NORTH;
   id = 0;
   nextOP.op = Operation::FORWARD;
+  addGoal(GOAL_LIST);
+  present_goal = getGoal();
 }
-
+void Agent::addGoal(const std::set<int32_t>& id_set){
+  for(auto itr = id_set.begin(); itr != id_set.end(); itr++){
+    goalSet.insert(*itr);
+  }
+}
 void Agent::update(const IndexVec &vec, const Direction &dir){
   if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   dist = vec;
   auto lastOP = nextOP;
   maze->updateWall(vec, dir);
+  if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
+    deleteGoal(present_goal);
+    if(getGoalSize() == 0){
+      addGoal(30);
+      addGoal(20);
+      addGoal(10);
+      addGoal(64 * 15 + 2 * 7 + 1);
+      addGoal(64 * 13 + 2 * 5 + 1);
+      addGoal(64 * 11 + 2 * 3 + 1);
+      while(node->get_node(getGoal()).get_wall_visible() == true){
+        deleteGoal(getGoal());
+        if(getGoalSize() == 0)  break;
+      }
+      state = Agent::SEARCHING_REACHED_GOAL;
+    }
+  }
+  if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
+    deleteGoal(present_goal);
+    while(node->get_node(getGoal()).get_wall_visible() == true){
+      deleteGoal(getGoal());
+      if(getGoalSize() == 0)  break;
+    }
+    if(getGoalSize() == 0){
+      state = Agent::BACK_TO_START;
+      addGoal(0);
+    }
+  }
   //node->start_edge_map(id, target_id);
-  node->startEdgeMap(id, target_id);
-  auto node_queue = node->getPathQueue(id, target_id);
+  present_goal = node->startEdgeMap(id, goalSet);
+  auto node_queue = node->getPathQueue(id, present_goal);
   auto dir_list = generateDirectionList(node_queue);
 
   auto next_dir = dir_list[0];
@@ -55,12 +89,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
   mazePrint(id);
 
-  if(target_id == id && state == Agent::SEARCHING_NOT_GOAL){
-    //printf("finished");
-    target_id = 0;
-    state = Agent::BACK_TO_START;
-  }
-  if(target_id == id && state == Agent::BACK_TO_START){
+  if(present_goal == id && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;
   }
 }
