@@ -18,7 +18,7 @@
  *
  *	迷路情報は外に保存をするが、Agent::updateを通して更新をしていく
  **************************************************************/
-constexpr int32_t GOAL = 64 * 7 + 2 * 8;
+constexpr int32_t GOAL = 64 * 9 + 2 * 6;
 extern std::set<int32_t> GOAL_LIST;
 class Agent {
 public:
@@ -66,8 +66,8 @@ public:
   Operation getNextOperation();
   IndexVec getNextIndex();
   inline const State &getState() const {return state;}
-  void mazePrint(){maze->printWall();}
-  void mazePrint(int32_t id);
+  //void mazePrint(){maze->printWall();}
+  //void mazePrint(int32_t id);
 };
 
 

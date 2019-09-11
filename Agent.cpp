@@ -4,7 +4,7 @@
 #include "Agent.h"
 #include "Operation.h"
 
-std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8};
+std::set<int32_t> GOAL_LIST{64 * 9 + 2 * 6, 64 * 9 + 2 * 6 + 1, 64 * 9 + 2 * 7};
 //状態をIDLEにし、path関連を全てクリアする
 void Agent::reset()
 {
@@ -34,12 +34,16 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
     deleteGoal(present_goal);
     if(getGoalSize() == 0){
+      auto check_set = node->getUnknownFastestWall(0, GOAL);
+      goalSet.merge(check_set);
+      /*
       addGoal(30);
       addGoal(20);
       addGoal(10);
       addGoal(64 * 15 + 2 * 7 + 1);
       addGoal(64 * 13 + 2 * 5 + 1);
       addGoal(64 * 11 + 2 * 3 + 1);
+      */
       while(node->get_node(getGoal()).get_wall_visible() == true){
         deleteGoal(getGoal());
         if(getGoalSize() == 0)  break;
@@ -47,11 +51,15 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
       state = Agent::SEARCHING_REACHED_GOAL;
     }
   }
-  if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
+  else if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
     deleteGoal(present_goal);
     while(node->get_node(getGoal()).get_wall_visible() == true){
       deleteGoal(getGoal());
       if(getGoalSize() == 0)  break;
+    }
+    if(node->get_node(present_goal).get_wall_state() == true){
+      goalSet.clear();
+      goalSet = node->getUnknownFastestWall(0, GOAL);
     }
     if(getGoalSize() == 0){
       state = Agent::BACK_TO_START;
@@ -87,8 +95,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   IndexVec tmp_vec = getNextIndex();
   print_operation(nextOP);
   //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
-  mazePrint(id);
-
+  maze->printWall(id, goalSet);
   if(present_goal == id && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;
   }
@@ -123,8 +130,10 @@ IndexVec Agent::getNextIndex(){
   }
   return tmp_vec;
 }
+/*
 void Agent::mazePrint(int32_t id){
   std::priority_queue<int> id_queue;
   id_queue.push(id);
   maze->printWall(id_queue);
 }
+*/
