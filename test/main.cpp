@@ -16,7 +16,7 @@ int main(){
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  auto sampleData = AllJapan_032_2011_classic_exp_fin_16x16;
+  auto sampleData = H2019_East;
   dir = sampleData[0 + 16 * (15 - 1)];
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
   printf("============\n");
@@ -29,7 +29,7 @@ int main(){
     po = agent.getNextIndex();
     dir = sampleData[po.x + 16 *(15 - po.y)];
     agent.update(po, dir.byte | 0xf0);
-    usleep(14 * 10 * 1000);
+    usleep(10 * 10 * 1000);
     if(agent.getState() == Agent::FINISHED) break;
   }
   node.startEdgeMap(0, GOAL, true);
