@@ -109,8 +109,13 @@ union __attribute__ ((__packed__)) Direction {
       return b;
     }
 };
+struct EdgeVec {
+  Direction dir;
+  uint8_t cnt;
 
-
+  EdgeVec(Direction dir_=0, uint8_t cnt_=0) : dir(dir_), cnt(cnt_) {}
+  inline void clear(){dir = 0, cnt =0;}
+};
 struct __attribute__ ((__packed__)) IndexVec {
   int8_t x;
   int8_t y;
@@ -190,6 +195,12 @@ class Maze{
     void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
     void printWall(NodeQueue<NodeIndex> node_queue);
     void printWall(std::priority_queue<int> id_queue);
+    void printWall(int32_t id, const std::set<int32_t> &goal_set){
+      std::priority_queue<int32_t> id_queue;
+      id_queue.push(id);
+      printWall(id_queue, goal_set);
+    }
+    void printWall(std::priority_queue<int> id_queue, const std::set<int32_t> &goal_set);
     void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
@@ -207,9 +218,10 @@ struct NodeInfo{
     int32_t mother_number;
     uint32_t cost;
     std::bitset<WALL_AMOUNT>* wall_pointer;
+    EdgeVec edgeVec;
   public:
     NodeInfo(){}
-    NodeInfo(int32_t num, uint32_t cost_ = 0) : serial_number(num), mother_number(serial_number), cost(cost_){}
+    NodeInfo(int32_t num, uint32_t cost_ = 0): serial_number(num), mother_number(serial_number), cost(cost_), edgeVec(0,0){}
     inline bool operator<(const NodeInfo &obj) const { return cost < obj.cost;}
     inline bool operator>(const NodeInfo &obj) const { return cost > obj.cost;}
     std::pair<IndexVec, Direction> getIndexInfo(){
@@ -229,9 +241,15 @@ struct NodeInfo{
     int32_t get_my_id()const{ return serial_number;}
     int32_t get_mother_id()const{ return mother_number;}
     uint32_t get_cost() const{return cost;}
+    EdgeVec get_edgeVec() const{return edgeVec;}
     inline bool get_wall_state() const{return WallData.test(serial_number * 2);}
     inline bool get_wall_visible() const{return WallData.test(serial_number * 2 + 1);}
-    inline void set_info(int32_t mother, uint32_t cost_){
+
+    inline void set_info(const int32_t &mother, const uint32_t &cost_, EdgeVec edge_){
+      set_info(mother, cost_);
+      edgeVec = edge_;
+    }
+    inline void set_info(const int32_t &mother, const uint32_t &cost_){
       mother_number = mother;
       cost = cost_;
     }
@@ -258,6 +276,7 @@ class Node{
         node[i].cost = 10000;
         node[i].serial_number = i;
         node[i].mother_number = i;
+        node[i].edgeVec.clear();
       }
     }
     NodeQueue<NodeIndex> search_neighbor_node(NodeIndex node){
@@ -273,14 +292,16 @@ class Node{
     NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);
     //NodeQueue<NodeIndex> queueTask(int32_t start_id);
     
-    void startEdgeMap(int32_t start_id, int32_t end_id, bool visible = false);
-    int32_t startEdgeMap(int32_t start_id, const std::set<int32_t>& end_set, bool visible = false);
+    std::set<int32_t> getUnknownFastestWall(const int32_t &start_id, const int32_t &end_id);
+    //void startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
+    int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
+    int32_t startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
     std::list<NodeIndex> checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible = false);
     std::list<NodeIndex> getNeighborNode(int32_t present_number, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
-void node_debug(NodeQueue<NodeIndex> poi);
+//void node_debug(NodeQueue<NodeIndex> poi);
 bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id);
 bool node_check(std::list<NodeIndex> node_list, int32_t end_id);
 int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set);

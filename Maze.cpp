@@ -124,8 +124,72 @@ void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
 	}
 	std::printf("+\r\n");
 }
-void Maze::printWall(std::priority_queue<int> id_queue){
+void Maze::printWall(std::priority_queue<int> id_queue,const std::set<int32_t>& goal_set){
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
+		for (int x=0;x<MAZE_SIZE;x++) {
+			std::printf("+");
+      bool flag = false;
+			if(getWall(x,y).bits.North){
+        std::printf("-----");
+        flag = true;
+      }
+			else{
+        auto tmp_queue = id_queue;
+        while(!tmp_queue.empty()){
+          if(tmp_queue.top() == 2 * MAZE_SIZE * y + 2 * x){
+            printf("\x1b[31m");     /* 前景色を赤に */
+            printf("  *  ");
+            printf("\x1b[39m");     /* 前景色をデフォルトに戻す */
+            flag = true;
+            break;
+          }
+          else if(tmp_queue.top() < 2 * MAZE_SIZE * y + 2 * x)  break;
+          tmp_queue.pop();
+        }
+      }
+      if(flag == false){
+        if(goal_set.find(2 * MAZE_SIZE * y + 2 * x) != goal_set.end())  printf("\x1b[45m");     /* 背景色をマゼンタに */
+        std::printf("     ");
+        printf("\x1b[49m");     /* 背景色をデフォルトに */
+      }
+		}
+		std::printf("+\r\n");
 
+		for (int x=0;x<MAZE_SIZE;x++) {
+      bool flag = false;
+			if(getWall(x, y).bits.West){
+        std::printf("|");
+        flag = true;
+      }
+			else{
+        auto tmp_queue = id_queue;
+        while(!tmp_queue.empty()){
+          if(tmp_queue.top() == 2 * MAZE_SIZE * y + 2 * x - 1){
+            printf("\x1b[31m");     /* 前景色を赤に */
+            printf("*");
+            printf("\x1b[39m");     /* 前景色をデフォルトに戻す */
+            flag = true;
+            break;
+          }
+          else if(tmp_queue.top() < 2 * MAZE_SIZE * y + 2 * x - 1)  break;
+          tmp_queue.pop();
+        }
+      }
+      if(flag == false){
+        if(goal_set.find(2 * MAZE_SIZE * y + 2 * x - 1) != goal_set.end())  printf("\x1b[45m");     /* 背景色をマゼンタに */
+        std::printf(" ");
+        printf("\x1b[49m");     /* 背景色をデフォルトに */
+      }
+			std::printf("     ");
+		}
+		std::printf("|\r\n");
+	}
+	for (int i=0;i<MAZE_SIZE;i++) {
+		std::printf("------");
+	}
+	std::printf("+\r\n");
+}
+void Maze::printWall(std::priority_queue<int> id_queue){
 	for (int y=MAZE_SIZE-1;y>=0;y--) {
 		for (int x=0;x<MAZE_SIZE;x++) {
 			std::printf("+");
@@ -199,7 +263,6 @@ void Maze::loadFromArray(uint8_t* array){
       updateWall(i % (MAZE_SIZE / 2), MAZE_SIZE / 2  - i / (MAZE_SIZE / 2) - 1, Direction(array[i]));
   }
 }
-
 std::list<NodeIndex> Node::getNeighborNode(int32_t present_number, bool visible){
   std::list<NodeIndex> node_list;
   //Also return the edge node
@@ -297,7 +360,7 @@ NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number, bool vis
   }
   return check_queue_quality(node_queue, visible);
 }
-int32_t Node::startEdgeMap(int32_t start_id, const std::set<int32_t>& end_set, bool visible){
+int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end_set, bool visible){
   clear();
   NodeQueue<NodeIndex> node_queue;
   node[start_id].set_info(start_id, 0);
@@ -319,6 +382,12 @@ int32_t Node::startEdgeMap(int32_t start_id, const std::set<int32_t>& end_set, b
 }
 
 
+int32_t Node::startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible){
+  std::set<int32_t> id_set;
+  id_set.insert(end_id);
+  return startEdgeMap(start_id, id_set, visible);
+}
+/*
 void Node::startEdgeMap(int32_t start_id, int32_t end_id, bool visible){
   clear();
   NodeQueue<NodeIndex> node_queue;
@@ -338,6 +407,7 @@ void Node::startEdgeMap(int32_t start_id, int32_t end_id, bool visible){
     }
   }
 }
+*/
 
 void Node::start_edge_map(int32_t start_id, int32_t end_id, bool visible){
   clear();
@@ -377,6 +447,19 @@ NodeQueue<NodeIndex> Node::getPathQueue(int32_t start_id, int32_t end_id){
   }
   return node_queue;
 }
+std::set<int32_t> Node::getUnknownFastestWall(const int32_t &start_id, const int32_t &end_id){
+  startEdgeMap(start_id, end_id);
+  auto path_queue = getPathQueue(start_id, end_id);
+  std::set<int32_t> check_set;
+  while(!path_queue.empty()){
+    NodeIndex top_node = path_queue.top();
+    int32_t top_id = top_node.get_my_id();
+    if(node[top_id].get_wall_visible() == false)  check_set.insert(top_id);
+    path_queue.pop();
+  }
+  return check_set;
+}
+
 NodeQueue<NodeIndex> Node::check_queue_quality(NodeQueue<NodeIndex> target_queue, bool visible){
   NodeQueue<NodeIndex> que;
   while(!target_queue.empty()){
@@ -460,6 +543,7 @@ NodeQueue<NodeInfo> Node::queueTask(int32_t start_id){
   return node_queue;
 }
 */
+/*
 void node_debug(NodeQueue<NodeInfo> poi){
   printf("Node Debug\n");
   while(!poi.empty()){
@@ -468,6 +552,7 @@ void node_debug(NodeQueue<NodeInfo> poi){
     poi.pop();
   }
 }
+*/
 bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id){
   while(!node_queue.empty()){
     NodeIndex hoge = node_queue.top();
