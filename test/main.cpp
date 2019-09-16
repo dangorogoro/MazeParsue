@@ -10,13 +10,19 @@
 #include "MazeData.h"
 #include "Operation.h"
 #include "Agent.h"
+#include "Cost.h"
 int main(){
+  
+  auto table = factorial_table<uint32_t, 10>();
+  //auto value = generate_array<uint32_t>(std::make_integer_sequence<std::uint32_t, 4>{});
+  std::cout<<table.get(2)<<", "<<table.get(3)<<factorial<uint32_t, 10>(5)<<std::endl;
+  return 0;
   Maze maze(WallData);
   Node node;
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  auto sampleData = H2019_East;
+  auto sampleData = alljapan2011x_exp_fin;
   dir = sampleData[0 + 16 * (15 - 1)];
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
   printf("============\n");
@@ -32,7 +38,8 @@ int main(){
     usleep(10 * 10 * 1000);
     if(agent.getState() == Agent::FINISHED) break;
   }
-  node.startEdgeMap(0, GOAL, true);
+  //node.startEdgeMap(0, GOAL, true);
+  node.startFastestMap(0, GOAL, true);
   auto ans_path = node.getPathQueue(0, GOAL);
   maze.printWall(ans_path);
   //print_operation(loadPath(ans_path,1));

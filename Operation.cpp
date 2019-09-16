@@ -63,7 +63,7 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
     //printf("last_node id is %d\n", last_node.get_my_id());
     NodeIndex present_node = node_queue.top();
     //printf("present_node id is %d\n", present_node.get_my_id());
-    Direction dir = node_relation(last_node, present_node);
+    Direction dir = node_relation(last_node.get_my_id(), present_node.get_my_id());
     //printf("dir is 0x%x\n", dir);
     dir_list.push_back(dir);
     last_node = present_node;
