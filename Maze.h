@@ -109,12 +109,12 @@ union __attribute__ ((__packed__)) Direction {
       return b;
     }
 };
-struct EdgeVec {
+struct __attribute__ ((__packed__)) EdgeVec {
   Direction dir;
   uint8_t cnt;
 
-  EdgeVec(Direction dir_=0, uint8_t cnt_=0) : dir(dir_), cnt(cnt_) {}
-  inline void clear(){dir = 0, cnt =0;}
+  EdgeVec(Direction dir_= 0, uint8_t cnt_= 0) : dir(dir_), cnt(cnt_) {}
+  inline void clear(){dir = 0, cnt = 0;}
 };
 struct __attribute__ ((__packed__)) IndexVec {
   int8_t x;
@@ -265,6 +265,7 @@ struct NodeIndex{
     inline bool operator>(const NodeIndex &obj) const{return node_pointer[index].get_cost() > obj.get_cost();}
     uint32_t get_cost()const {return node_pointer[index].get_cost();}
     int32_t get_my_id()const {return index;}
+    EdgeVec get_edgeVec()const {return node_pointer[index].get_edgeVec();}
 };
 class Node{
   private:
@@ -273,7 +274,7 @@ class Node{
     Node(){clear();}
     void clear(){
       for(int i = 0; i < WALL_AMOUNT; i++){
-        node[i].cost = 10000;
+        node[i].cost = 65535;
         node[i].serial_number = i;
         node[i].mother_number = i;
         node[i].edgeVec.clear();
@@ -283,10 +284,8 @@ class Node{
       return search_neighbor_node(node.get_my_id());
     }
     NodeQueue<NodeIndex> search_neighbor_node(int32_t serial_number, bool visible = false);
-    void start_edge_map(int32_t start_id, int32_t end_id, bool visible = false);
     NodeQueue<NodeIndex> getPathQueue(int32_t start_id, int32_t end_id);
     NodeQueue<NodeIndex> check_queue_quality(NodeQueue<NodeIndex>, bool visible = false);
-    NodeQueue<NodeIndex> updateQueue(NodeQueue<NodeIndex> node_queue, int32_t id);
     void updateNodeIndex(NodeIndex target_node, bool force_flag = false);
     void updateNodeIndex(NodeQueue<NodeIndex> node_queue, bool force_flag = false);
     NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);
@@ -297,14 +296,19 @@ class Node{
     int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
+    void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
     std::list<NodeIndex> checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible = false);
+
+    //std::list<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
     std::list<NodeIndex> getNeighborNode(int32_t present_number, bool visible = false);
+    int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
+    int32_t startFastestMap(const int32_t &start_id, const std::set<int32_t> &end_set, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 //void node_debug(NodeQueue<NodeIndex> poi);
 bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id);
 bool node_check(std::list<NodeIndex> node_list, int32_t end_id);
 int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set);
-Direction node_relation(NodeIndex src_index, NodeIndex dst_index);
+Direction node_relation(const int32_t &src, const int32_t &dst_index);
 
 #endif
