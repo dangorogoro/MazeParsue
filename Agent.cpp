@@ -4,7 +4,7 @@
 #include "Agent.h"
 #include "Operation.h"
 
-std::set<int32_t> GOAL_LIST{64 * 9 + 2 * 6, 64 * 9 + 2 * 6 + 1, 64 * 9 + 2 * 7};
+std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8 + 1, 64 * 7 + 2 * 8};
 //状態をIDLEにし、path関連を全てクリアする
 void Agent::reset()
 {
@@ -20,6 +20,7 @@ void Agent::reset()
   nextOP.op = Operation::FORWARD;
   addGoal(GOAL_LIST);
   present_goal = getGoal();
+  maze->updateWall(IndexVec(0,0), 0xfd);
 }
 void Agent::addGoal(const std::set<int32_t>& id_set){
   for(auto itr = id_set.begin(); itr != id_set.end(); itr++){
@@ -36,14 +37,6 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     if(getGoalSize() == 0){
       auto check_set = node->getUnknownFastestWall(0, GOAL);
       goalSet.merge(check_set);
-      /*
-      addGoal(30);
-      addGoal(20);
-      addGoal(10);
-      addGoal(64 * 15 + 2 * 7 + 1);
-      addGoal(64 * 13 + 2 * 5 + 1);
-      addGoal(64 * 11 + 2 * 3 + 1);
-      */
       while(node->get_node(getGoal()).get_wall_visible() == true){
         deleteGoal(getGoal());
         if(getGoalSize() == 0)  break;
