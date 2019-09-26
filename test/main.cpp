@@ -13,9 +13,16 @@
 #include "Cost.h"
 int main(){
   
-  auto table = factorial_table<uint32_t, 10>();
-  //auto value = generate_array<uint32_t>(std::make_integer_sequence<std::uint32_t, 4>{});
-  std::cout<<table.get(2)<<", "<<table.get(3)<<factorial<uint32_t, 10>(5)<<std::endl;
+  auto table = cost_table<uint32_t, 10>();
+  //std::cout<<table.get(2)<<", "<<table.get(3)<<factorial<uint32_t, 10>(5)<<std::endl;
+  for(size_t i = 0; i < 10; i++){
+    std::cout<<table.get(i, true)<<",";
+  }
+  std::cout<<std::endl;
+  for(size_t i = 0; i < 10; i++){
+    std::cout<<table.get(i, false)<<",";
+  }
+  std::cout<<std::endl;
   return 0;
   Maze maze(WallData);
   Node node;
