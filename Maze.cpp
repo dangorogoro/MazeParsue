@@ -124,6 +124,37 @@ void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
 	}
 	std::printf("+\r\n");
 }
+void Maze::printWall(const Node& node){
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
+		for (int x=0;x<MAZE_SIZE;x++) {
+			std::printf("+");
+			//if(getWall(x,y).bits.North) std::printf("----");
+			//else std::printf("    ");
+			if(getWall(x,y).bits.North) std::printf("-----");
+      else if(node.get_node(2 * MAZE_SIZE * y + 2 * x).get_cost() == 65535)  std::printf("     ");
+      else std::printf("%5d", node.get_node(2 * MAZE_SIZE * y + 2 * x).get_cost());
+		}
+		std::printf("+\r\n");
+
+		for (int x=0;x<MAZE_SIZE;x++) {
+      if(x == 0){
+        if (getWall(x, y).bits.West) std::printf("|  ");
+      }
+			else{
+        std::printf(" ");
+        if(getWall(x,y).bits.West) std::printf("  |  ");
+        else if(node.get_node(2 * MAZE_SIZE * y + 2 * x - 1).get_cost() == 65535)  std::printf("     ");
+        else  std::printf("%5d", node.get_node(2 * MAZE_SIZE * y + 2 * x - 1).get_cost());
+      }
+		}
+		std::printf("  |\r\n");
+	}
+	for (int i=0;i<MAZE_SIZE;i++) {
+		std::printf("------");
+	}
+	std::printf("+\r\n");
+}
+  
 void Maze::printWall(std::priority_queue<int> id_queue,const std::set<int32_t>& goal_set){
 	for (int y=MAZE_SIZE-1;y>=0;y--) {
 		for (int x=0;x<MAZE_SIZE;x++) {
@@ -331,6 +362,7 @@ std::list<NodeIndex> Node::getNeighborNode(int32_t present_number, bool visible)
 }
 
 NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number, bool visible){
+  //NOT USED!!!!!!!!!!
   NodeQueue<NodeIndex> node_queue;
   //Also return the edge node
   //->To check corner
@@ -480,7 +512,8 @@ std::list<NodeIndex> Node::checkQueueQuality(const std::list<NodeIndex> &target_
   for(auto itr = target_list.begin(); itr != target_list.end(); itr++){
     auto top_node = *itr;
     int32_t top_id = top_node.get_my_id();
-    if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() == 65535){
+    //if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() == 65535){
+    if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner()){
       if(visible == true && node[top_id].get_wall_visible() == false){
         //printf("wrong top id %d \n", top_id);
       }
@@ -501,12 +534,17 @@ void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<
       nextEdge.cnt = motherEdge.cnt + 1;
     }
     else if((uint8_t)(nextEdge.dir & motherEdge.dir) == 0) continue;
+
+    /*
     if(nextEdge.cnt < 10)  cost = 100 - 5 * nextEdge.cnt;
     else  cost = 1;
+    */
+    cost = (bit_count(nextEdge.dir) == 2) ? cost_table.diff_get(nextEdge.cnt, true) : cost_table.diff_get(nextEdge.cnt, false);
+
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost, nextEdge);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
+      printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }

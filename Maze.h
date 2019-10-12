@@ -10,8 +10,17 @@
 #include <set>
 #include <iterator>
 #include "Parsue_Conf.h"
-
+#include "Cost.h"
 constexpr uint32_t WALL_AMOUNT = 2 * (2 * MAZE_SIZE * MAZE_SIZE);
+inline uint8_t bit_count(uint8_t byte){
+  uint8_t b = byte & 0x0f;
+  b = (b & 0x55) + (b >> 1 & 0x55);
+  b = (b & 0x33) + (b >> 2 & 0x33);
+  b = (b & 0x0f) + (b >> 4 & 0x0f);
+  return b;
+}
+
+class Node;
 /*
 #define NORTH_STATE(x,y) (2 * ((MAZE_SIZE - 1) * x + y))
 #define NORTH_VISIBLE(x,y) (2 * ((MAZE_SIZE - 1) * x + y) + 1)
@@ -31,14 +40,6 @@ constexpr uint32_t WEST_STATE(int8_t x, int8_t y){return EAST_STATE(x-1,y);}
 constexpr uint32_t WEST_VISIBLE(int8_t x, int8_t y){return EAST_STATE(x-1,y) + 1;}
 constexpr uint32_t SOUTH_STATE(int8_t x, int8_t y){return NORTH_STATE(x,y-1);}
 constexpr uint32_t SOUTH_VISIBLE(int8_t x, int8_t y){return NORTH_STATE(x,y-1) + 1;}
-/*
-#define EAST_STATE(x,y) (NORTH_STATE(x,y) + 2)
-#define EAST_VISIBLE(x,y) (EAST_STATE(x,y) + 1)
-#define SOUTH_STATE(x,y) (NORTH_STATE(x,y-1))
-#define SOUTH_VISIBLE(x,y) (NORTH_VISIBLE(x,y-1))
-#define WEST_STATE(x,y) (EAST_STATE(x-1,y))
-#define WEST_VISIBLE(x,y) (EAST_VISIBLE(x-1,y))
-*/
 
 template<uint32_t T>
 using WallStr = std::bitset<T>;
@@ -195,6 +196,7 @@ class Maze{
     void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
     void printWall(NodeQueue<NodeIndex> node_queue);
     void printWall(std::priority_queue<int> id_queue);
+    void printWall(const Node& node);
     void printWall(int32_t id, const std::set<int32_t> &goal_set){
       std::priority_queue<int32_t> id_queue;
       id_queue.push(id);
