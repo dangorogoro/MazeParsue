@@ -17,14 +17,6 @@ typedef std::vector<IndexVec> Path;
  *	opが動きの種類で、「opをn回実行する」という意味
  **************************************************************/
 //Operation Solver
-inline uint8_t bit_count(uint8_t byte){
-  uint8_t b = byte & 0x0f;
-  b = (b & 0x55) + (b >> 1 & 0x55);
-  b = (b & 0x33) + (b >> 2 & 0x33);
-  b = (b & 0x0f) + (b >> 4 & 0x0f);
-  return b;
-}
-
 struct Operation {
 	typedef enum {
 		FORWARD,
