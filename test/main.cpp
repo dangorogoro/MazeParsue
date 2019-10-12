@@ -10,20 +10,22 @@
 #include "MazeData.h"
 #include "Operation.h"
 #include "Agent.h"
-#include "Cost.h"
 int main(){
   
-  auto table = cost_table<uint32_t, 10>();
+  /*
+  auto table = CostTable<uint32_t, 30>();
   //std::cout<<table.get(2)<<", "<<table.get(3)<<factorial<uint32_t, 10>(5)<<std::endl;
-  for(size_t i = 0; i < 10; i++){
-    std::cout<<table.get(i, true)<<",";
+  for(size_t i = 0; i < 30; i++){
+    std::cout<<table.diff_get(i, true)<<",";
   }
   std::cout<<std::endl;
-  for(size_t i = 0; i < 10; i++){
-    std::cout<<table.get(i, false)<<",";
+  for(size_t i = 0; i < 30; i++){
+    std::cout<<table.diff_get(i, false)<<",";
   }
   std::cout<<std::endl;
   return 0;
+  */
+
   Maze maze(WallData);
   Node node;
   Agent agent(maze, node);
@@ -42,13 +44,14 @@ int main(){
     po = agent.getNextIndex();
     dir = sampleData[po.x + 16 *(15 - po.y)];
     agent.update(po, dir.byte | 0xf0);
-    usleep(10 * 10 * 1000);
+    usleep(1 * 10 * 1000);
     if(agent.getState() == Agent::FINISHED) break;
   }
   //node.startEdgeMap(0, GOAL, true);
   node.startFastestMap(0, GOAL, true);
   auto ans_path = node.getPathQueue(0, GOAL);
   maze.printWall(ans_path);
+  maze.printWall(node);
   //print_operation(loadPath(ans_path,1));
 #if 0
   /*
