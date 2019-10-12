@@ -6,8 +6,6 @@
 #include <array>
 #include <utility>
 #include "Parsue_Conf.h"
-#include "Maze.h"
-#include "Operation.h"
 
 /*
 class Cost{
@@ -17,9 +15,9 @@ class Cost{
     Cost(uint32_t max_forward_velocity, uint32_t max_turn_velocity, uint32_t accel);
 };
 */
-constexpr float max_forward_velocity = 3;
-constexpr float accel = 10;
-constexpr float max_turn_velocity = 0.8;
+constexpr float max_forward_velocity = 4.0;
+constexpr float accel = 13;
+constexpr float max_turn_velocity = 0.6;
 
 
 template<typename Real>
@@ -29,14 +27,15 @@ constexpr Real factorial_impl(std::uint32_t i) noexcept{
 
 template<typename Real>
 constexpr Real cost_solve_impl(const std::uint32_t &i, const bool &diagonal) noexcept{
-  float field_length = MAZE_1BLOCK_LENGTH * i;
+  float field_length = MAZE_1BLOCK_LENGTH * (i + 1);
   if(diagonal == true) field_length /= sqrt(2.0);
-  float offset_time = (max_forward_velocity - max_turn_velocity) / accel;
+  float offset_time = (max_forward_velocity - max_turn_velocity) / accel * 2;//UP and DOWN
   float offset_length = (max_forward_velocity + max_turn_velocity) / 2.0 * offset_time;
   if(field_length > offset_length)  return ((field_length - offset_length) / max_forward_velocity + offset_time) * 1000;
   else{
+    field_length /= 2.0;
     float v2 = max_turn_velocity * max_turn_velocity + 2 * accel * field_length;
-    return (sqrt(v2) - max_turn_velocity) / accel * 1000;
+    return (sqrt(v2) - max_turn_velocity) / accel * 1000 * 2.0;
   }
 }
 
@@ -47,15 +46,27 @@ constexpr std::array<Real, sizeof...(vals)> generate_array(const std::integer_se
 }
 
 template<typename Real, std::size_t N>
-struct cost_table{
+struct CostTable{
   constexpr static std::size_t size = N;
   constexpr static std::array<Real, N> straight_cost = generate_array<Real>(std::make_integer_sequence<Real, N>{}, false);
-  constexpr static std::array<Real, N> diagonal_cost = generate_array<Real>(std::make_integer_sequence<Real, N>{}, true);
+  constexpr static std::array<Real, 2 * N> diagonal_cost = generate_array<Real>(std::make_integer_sequence<Real, 2 * N>{}, true);
   constexpr static Real get(const std::size_t &i, const bool &diagonal) noexcept{
-    //C++11ではstd::array::operator[]() constはconstexprではない。
-    //C++14からstd::array::operator[]() constがconstexprに、
-    //C++17からstd::arrayのメンバの殆どがconstexprになる。
-    return diagonal == true ? cost_table<Real, N>::diagonal_cost[i] : cost_table<Real, N>::straight_cost[i];
+    //C++11ではstd::array::operator[]() constはconstexprでない.
+    //C++14からstd::array::operator[]() constがconstexprに,
+    //C++17からstd::arrayのメンバのほとんどがconstexprになる.
+    return diagonal == true ? CostTable<Real, N>::diagonal_cost[i] : CostTable<Real, N>::straight_cost[i];
+  }
+  constexpr static Real diff_get(const std::size_t &i, const bool &diagonal) noexcept{
+    if(i == 0)  return diagonal == true ? CostTable<Real, N>::diagonal_cost[i] : CostTable<Real, N>::straight_cost[i];
+    else  return diagonal == true ? CostTable<Real, N>::diagonal_cost[i] - CostTable<Real, N>::diagonal_cost[i-1]: CostTable<Real, N>::straight_cost[i] - CostTable<Real, N>::straight_cost[i-1];
+    /*
+    if(i == 0) return diagonal == true ? CostTable<Real, N>::diagonal_cost[i] : CostTable<Real, N>::straight_cost[i];
+
+    else{
+      return diagonal == true ? CostTable<Real, N>::diagonal_cost[i]  - CostTable<Real, N>::diagonal_cost[i - 1] : CostTable<Real, N>::straight_cost[i] - 
+        CostTable<Real, N>::straight_cost[i - 1];
+    }
+    */
   }
 };
 /*
@@ -74,6 +85,7 @@ struct factorial_table{
 
 template<typename Real, std::size_t N>
 constexpr static Real cost(std::size_t i) noexcept{
-  return cost_table<Real, N>::get(i);
+  return CostTable<Real, N>::get(i);
 }
+extern CostTable<uint16_t, MAZE_SIZE> cost_table;
 #endif
