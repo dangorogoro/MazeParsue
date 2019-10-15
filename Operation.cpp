@@ -11,7 +11,7 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
   opList.push_back(last_op);
   for(auto itr = dir_list.begin(); itr != dir_list.end(); itr++){
     const Direction next_dir = *itr;
-    auto next_op = nextOperation(last_op, last_dir, next_dir);
+    auto next_op = nextOperation(last_dir, next_dir);
     if(last_op.op == Operation::FORWARD && next_op.op == Operation::FORWARD){
       auto back_vec = opList.back();
       opList.pop_back();
@@ -72,7 +72,7 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
   return dir_list;
 }
 
-Operation nextOperation(const Operation &present_op, const Direction &last_dir, const Direction &present_dir){
+Operation nextOperation(const Direction &last_dir, const Direction &present_dir){
   if(bit_count(last_dir) == 1 && bit_count(present_dir) == 1)
     return Operation(Operation::FORWARD, 1);
   Direction first_dir = (last_dir & present_dir);

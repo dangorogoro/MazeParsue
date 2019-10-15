@@ -75,7 +75,7 @@ public:
 	const Operation &operator[](size_t i) const { return opList[i]; }
 };
 OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal);
-Operation nextOperation(const Operation &present_op, const Direction &last_dir, const Direction &present_dir);
+Operation nextOperation(const Direction &last_dir, const Direction &present_dir);
 Operation nextOperation(Operation op, Direction present_dir, Direction next_dir, Direction future_dir, bool diagonal = false);
 std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue);
 Operation getTurnOperation(Direction first_dir, Direction second_dir, Operation::OperationType type);
