@@ -4,10 +4,10 @@
 #include "Agent.h"
 #include "Operation.h"
 
-std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8 + 1, 64 * 7 + 2 * 8};
+//std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8 + 1, 64 * 7 + 2 * 8};
+std::set<int32_t> GOAL_LIST{GOAL};
 //状態をIDLEにし、path関連を全てクリアする
-void Agent::reset()
-{
+void Agent::reset(){
 	state = Agent::IDLE;
 	distIndexList.clear();
 	dist.x = 0;
@@ -65,7 +65,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   auto dir_list = generateDirectionList(node_queue);
 
   auto next_dir = dir_list[0];
-  nextOP = nextOperation(lastOP, presentRobotDir, next_dir);
+  nextOP = nextOperation(presentRobotDir, next_dir);
 
 
   //printf("present dir is 0x%d\n", present_dir);
@@ -81,7 +81,30 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   }
   else{
     node_queue.pop();
-    id = node_queue.top().get_my_id();
+    int16_t next_id = node_queue.top().get_my_id();
+    if(nextOP.op == Operation::FORWARD){
+      uint16_t count = 0;
+      while(!node_queue.empty()){
+        node_queue.pop();
+        count++;
+        auto top_node_info = node->get_node(node_queue.top().get_my_id());
+        if(count >= dir_list.size()){
+          printf("size\n");
+          break;
+        }
+        if(top_node_info.get_wall_state() == false && top_node_info.get_wall_visible() == true){
+          auto future_dir = dir_list[count];
+          if(future_dir == presentRobotDir){
+            nextOP.n += 1;
+            next_id = node_queue.top().get_my_id();
+            printf("next id %d\n", next_id);
+          }
+          else break;
+        }
+        else break;
+      }
+    }
+    id = next_id;
     if(bit_count(next_dir) == 2)  presentRobotDir = next_dir - (presentRobotDir & next_dir);
   }
 
@@ -97,26 +120,27 @@ Operation Agent::getNextOperation(){
   return nextOP;
 }
 IndexVec Agent::getNextIndex(){
+  uint16_t steps = nextOP.n;
   IndexVec tmp_vec = dist;
   if(lastRobotDir == NORTH){
-    if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + 1;
-    else if(presentRobotDir == WEST)  tmp_vec.x = tmp_vec.x - 1;
-    else if(presentRobotDir == NORTH) tmp_vec.y = tmp_vec.y + 1;
+    if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + steps;
+    else if(presentRobotDir == WEST)  tmp_vec.x = tmp_vec.x - steps;
+    else if(presentRobotDir == NORTH) tmp_vec.y = tmp_vec.y + steps;
   }
   else if(lastRobotDir == WEST){
-    if(presentRobotDir == NORTH)  tmp_vec.y = tmp_vec.y + 1;
-    else if(presentRobotDir == SOUTH)  tmp_vec.y = tmp_vec.y - 1;
-    else if(presentRobotDir == WEST) tmp_vec.x = tmp_vec.x - 1;
+    if(presentRobotDir == NORTH)  tmp_vec.y = tmp_vec.y + steps;
+    else if(presentRobotDir == SOUTH)  tmp_vec.y = tmp_vec.y - steps;
+    else if(presentRobotDir == WEST) tmp_vec.x = tmp_vec.x - steps;
   }
   else if(lastRobotDir == SOUTH){
-    if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + 1;
-    else if(presentRobotDir == WEST)  tmp_vec.x = tmp_vec.x - 1;
-    else if(presentRobotDir == SOUTH) tmp_vec.y = tmp_vec.y - 1;
+    if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + steps;
+    else if(presentRobotDir == WEST)  tmp_vec.x = tmp_vec.x - steps;
+    else if(presentRobotDir == SOUTH) tmp_vec.y = tmp_vec.y - steps;
   }
   else if(lastRobotDir == EAST){
-    if(presentRobotDir == NORTH)  tmp_vec.y = tmp_vec.y + 1;
-    else if(presentRobotDir == SOUTH)  tmp_vec.y = tmp_vec.y - 1;
-    else if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + 1;
+    if(presentRobotDir == NORTH)  tmp_vec.y = tmp_vec.y + steps;
+    else if(presentRobotDir == SOUTH)  tmp_vec.y = tmp_vec.y - steps;
+    else if(presentRobotDir == EAST)  tmp_vec.x = tmp_vec.x + steps;
   }
   else{
     printf("wrong!!!!!!!!!!!!!!!!!!!!!!!!!");
