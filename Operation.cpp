@@ -87,7 +87,7 @@ Operation nextOperation(Operation present_op, Direction present_dir, Direction n
   //printf("next dir is 0x%x\n", next_dir);
   //printf("future dir is 0x%x\n", future_dir);
   //FORWARD
-  if(((present_dir | future_dir) == next_dir) || (present_dir ==  next_dir) && bit_count(present_dir) == 1){
+  if(((present_dir | future_dir) == next_dir) || ((present_dir ==  next_dir) && bit_count(present_dir) == 1)){
     return_op = Operation(Operation::FORWARD, 1);
     //printf("FORWARD\n");
   }

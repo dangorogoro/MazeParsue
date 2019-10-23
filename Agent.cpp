@@ -30,7 +30,7 @@ void Agent::addGoal(const std::set<int32_t>& id_set){
 void Agent::update(const IndexVec &vec, const Direction &dir){
   if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   dist = vec;
-  auto lastOP = nextOP;
+  //auto lastOP = nextOP;
   maze->updateWall(vec, dir);
   if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
     deleteGoal(present_goal);
@@ -108,7 +108,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     if(bit_count(next_dir) == 2)  presentRobotDir = next_dir - (presentRobotDir & next_dir);
   }
 
-  IndexVec tmp_vec = getNextIndex();
+  //IndexVec tmp_vec = getNextIndex();
   print_operation(nextOP);
   //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
   maze->printWall(id, goalSet);

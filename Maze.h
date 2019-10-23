@@ -137,17 +137,17 @@ struct __attribute__ ((__packed__)) IndexVec {
   inline bool canSum(const IndexVec &obj) const
   {
     const int8_t res_x = x + obj.x;
-    if (res_x<0 || MAZE_SIZE<=res_x) return false;
+    if (res_x<0 || MAZE_SIZE<=(uint8_t)res_x) return false;
     const int8_t res_y = y + obj.y;
-    if (res_y<0 || MAZE_SIZE<=res_y) return false;
+    if (res_y<0 || MAZE_SIZE<=(uint8_t)res_y) return false;
     return true;
   }
   inline bool canSub(const IndexVec &obj) const
   {
     const int8_t res_x = x - obj.x;
-    if (res_x<0 || MAZE_SIZE<=res_x) return false;
+    if (res_x<0 || MAZE_SIZE<=(uint8_t)res_x) return false;
     const int8_t res_y = y - obj.y;
-    if (res_y<0 || MAZE_SIZE<=res_y) return false;
+    if (res_y<0 || MAZE_SIZE<=(uint8_t)res_y) return false;
     return true;
   }
 
@@ -206,7 +206,7 @@ class Maze{
     void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
-      for(int i=0; i < MAZE_SIZE; i++){
+      for(uint16_t i=0; i < MAZE_SIZE; i++){
         wall_pointer->set(EAST_STATE(MAZE_SIZE - 1, i), 1);
         wall_pointer->set(EAST_VISIBLE(MAZE_SIZE - 1, i), 1);
         wall_pointer->set(NORTH_STATE(i, MAZE_SIZE - 1), 1);
@@ -236,7 +236,7 @@ struct NodeInfo{
       printf("serial_number is %d, cost is %d\n", serial_number, cost);
     }
     bool isCorner() const{
-      if((serial_number % (2 * MAZE_SIZE) == (2 * MAZE_SIZE - 1)) || (serial_number % 2 == 0 &&  serial_number > WALL_AMOUNT - 2 * MAZE_SIZE))
+      if((serial_number % (2 * MAZE_SIZE) == (2 * MAZE_SIZE - 1)) || (serial_number % 2 == 0 &&  (uint32_t)serial_number > WALL_AMOUNT - 2 * MAZE_SIZE))
         return true;
       else return false;
     }
@@ -275,7 +275,7 @@ class Node{
   public:
     Node(){clear();}
     void clear(){
-      for(int i = 0; i < WALL_AMOUNT; i++){
+      for(uint16_t i = 0; i < WALL_AMOUNT; i++){
         node[i].cost = 65535;
         node[i].serial_number = i;
         node[i].mother_number = i;
