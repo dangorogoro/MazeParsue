@@ -28,6 +28,7 @@ int main(){
 
   Maze maze(WallData);
   Node node;
+  maze.printWall();
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;

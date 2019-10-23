@@ -192,7 +192,7 @@ class Maze{
     Direction getSOUTH(int8_t x, int8_t y);
     inline void updateWall(IndexVec index, Direction dir, bool forceWrite = true){ updateWall(index.x, index.y, dir, forceWrite);}
     void updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite = true);
-    void printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE] = nullptr);
+    void printWall();
     void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
     void printWall(NodeQueue<NodeIndex> node_queue);
     void printWall(std::priority_queue<int32_t> id_queue);

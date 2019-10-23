@@ -69,29 +69,30 @@ void Maze::updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite){
     wall_pointer->set(WEST_VISIBLE(x,y), 1);
   }
 }
-void Maze::printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE]){
-	bool printValueOn = false;
-	if (value) printValueOn = true;
-
-	for (uint8_t y=MAZE_SIZE-1;y>=0;y--) {
+void Maze::printWall(){
+	for (int y=MAZE_SIZE-1;y>=0;y--) {
 		for (uint8_t x=0;x<MAZE_SIZE;x++) {
 			std::printf("+");
-			if(getWall(x, y).bits.North) std::printf("----");
-			else std::printf("    ");
+			//if(getWall(x,y).bits.North) std::printf("----");
+			//else std::printf("    ");
+			if(getWall(x,y).bits.North) std::printf("-----");
+      else std::printf("     ");
 		}
 		std::printf("+\r\n");
-
 		for (uint8_t x=0;x<MAZE_SIZE;x++) {
-			if (getWall(x, y).bits.West) std::printf("|");
-			else std::printf(" ");
-			std::printf(" ");
-			if (printValueOn) std::printf("%3u", value[y][x]);
-			else std::printf("   ");
+      if(x == 0){
+        if (getWall(x, y).bits.West) std::printf("|  ");
+      }
+			else{
+        std::printf(" ");
+        if(getWall(x,y).bits.West) std::printf("  |  ");
+        else  std::printf("     ");
+      }
 		}
-		std::printf("|\r\n");
+		std::printf("  |\r\n");
 	}
 	for (uint8_t i=0;i<MAZE_SIZE;i++) {
-		std::printf("-----");
+		std::printf("------");
 	}
 	std::printf("+\r\n");
 }
