@@ -15,9 +15,9 @@ class Cost{
     Cost(uint32_t max_forward_velocity, uint32_t max_turn_velocity, uint32_t accel);
 };
 */
-constexpr float max_forward_velocity = 3.5;
+constexpr float max_forward_velocity = 3500;
 constexpr float accel = 13;
-constexpr float max_turn_velocity = 0.9;
+constexpr float max_turn_velocity = 900;
 
 
 template<typename Real>
