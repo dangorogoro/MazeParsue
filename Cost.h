@@ -16,8 +16,8 @@ class Cost{
 };
 */
 constexpr float max_forward_velocity = 3500;
-constexpr float accel = 13;
-constexpr float max_turn_velocity = 900;
+constexpr float accel = 8;
+constexpr float max_turn_velocity = 1000;
 
 
 template<typename Real>
