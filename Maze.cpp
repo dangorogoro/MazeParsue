@@ -424,7 +424,6 @@ int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end
     while(!node_queue.empty()){
       NodeIndex top_index = node_queue.top();
       node_queue.pop();
-
       auto new_list = getNeighborNode(top_index.get_my_id(), visible);
       updateQueue(node_queue, new_list, top_index.get_my_id());
       flag = node_check(new_list, end_set);
@@ -519,6 +518,8 @@ std::list<NodeIndex> Node::checkQueueQuality(const std::list<NodeIndex> &target_
     if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner()){
       if(visible == true && node[top_id].get_wall_visible() == false){
         //printf("wrong top id %d \n", top_id);
+      }
+      else if(node[top_id].get_cost() != 65535){
       }
       //if(visible == true && node[top_id].get_wall_visible() == false) continue;
       else  node_list.push_back(top_node);
