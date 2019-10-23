@@ -155,7 +155,7 @@ void Maze::printWall(const Node& node){
 	std::printf("+\r\n");
 }
   
-void Maze::printWall(std::priority_queue<int> id_queue,const std::set<int32_t>& goal_set){
+void Maze::printWall(std::priority_queue<int32_t> id_queue,const std::set<int32_t>& goal_set){
 	for (int y=MAZE_SIZE-1;y>=0;y--) {
 		for (int x=0;x<MAZE_SIZE;x++) {
 			std::printf("+");
@@ -220,7 +220,7 @@ void Maze::printWall(std::priority_queue<int> id_queue,const std::set<int32_t>& 
 	}
 	std::printf("+\r\n");
 }
-void Maze::printWall(std::priority_queue<int> id_queue){
+void Maze::printWall(std::priority_queue<int32_t> id_queue){
 	for (int y=MAZE_SIZE-1;y>=0;y--) {
 		for (int x=0;x<MAZE_SIZE;x++) {
 			std::printf("+");
@@ -268,6 +268,7 @@ void Maze::printWall(std::priority_queue<int> id_queue){
         }
       }
       if(flag == false) std::printf(" ");
+
 			std::printf("     ");
 		}
 		std::printf("|\r\n");
@@ -278,7 +279,7 @@ void Maze::printWall(std::priority_queue<int> id_queue){
 	std::printf("+\r\n");
 }
 void Maze::printWall(NodeQueue<NodeIndex> node_queue){
-  std::priority_queue<int> id_queue;
+  std::priority_queue<int32_t> id_queue;
   while(!node_queue.empty()){
     id_queue.push(node_queue.top().get_my_id());
     node_queue.pop();

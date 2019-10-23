@@ -195,14 +195,14 @@ class Maze{
     void printWall(const uint8_t value[MAZE_SIZE][MAZE_SIZE] = nullptr);
     void printWall(const bool value[MAZE_SIZE][MAZE_SIZE]);
     void printWall(NodeQueue<NodeIndex> node_queue);
-    void printWall(std::priority_queue<int> id_queue);
+    void printWall(std::priority_queue<int32_t> id_queue);
     void printWall(const Node& node);
+    void printWall(std::priority_queue<int32_t> id_queue, const std::set<int32_t> &goal_set);
     void printWall(int32_t id, const std::set<int32_t> &goal_set){
       std::priority_queue<int32_t> id_queue;
       id_queue.push(id);
       printWall(id_queue, goal_set);
     }
-    void printWall(std::priority_queue<int> id_queue, const std::set<int32_t> &goal_set);
     void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
@@ -233,7 +233,7 @@ struct NodeInfo{
       return {IndexVec(x,y), dir};
     }
     void debug_info(){
-      printf("serial_number is %d, cost is %f\n", serial_number, cost);
+      printf("serial_number is %d, cost is %d\n", serial_number, cost);
     }
     bool isCorner() const{
       if((serial_number % (2 * MAZE_SIZE) == (2 * MAZE_SIZE - 1)) || (serial_number % 2 == 0 &&  serial_number > WALL_AMOUNT - 2 * MAZE_SIZE))
