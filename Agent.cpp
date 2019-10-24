@@ -41,7 +41,11 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
         deleteGoal(getGoal());
         if(getGoalSize() == 0)  break;
       }
-      state = Agent::SEARCHING_REACHED_GOAL;
+      if(getGoalSize() == 0){
+        state = Agent::BACK_TO_START;
+        addGoal(0);
+      }
+      else  state = Agent::SEARCHING_REACHED_GOAL;
     }
   }
   else if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
