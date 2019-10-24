@@ -548,7 +548,7 @@ void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost, nextEdge);
       node_queue.push(top_index);
-      printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
+      //printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
