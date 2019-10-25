@@ -246,6 +246,7 @@ struct NodeInfo{
     EdgeVec get_edgeVec() const{return edgeVec;}
     inline bool get_wall_state() const{return WallData.test(serial_number * 2);}
     inline bool get_wall_visible() const{return WallData.test(serial_number * 2 + 1);}
+    inline void clear_wall_visible() const{WallData.reset(serial_number * 2 + 1);}
 
     inline void set_info(const int32_t &mother, const uint32_t &cost_, EdgeVec edge_){
       set_info(mother, cost_);
