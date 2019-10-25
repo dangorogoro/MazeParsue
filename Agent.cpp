@@ -20,6 +20,7 @@ void Agent::reset(){
   nextOP.op = Operation::FORWARD;
   addGoal(GOAL_LIST);
   present_goal = getGoal();
+  node->get_node(present_goal).clear_wall_visible();
   maze->updateWall(IndexVec(0,0), 0xfd);
 }
 void Agent::addGoal(const std::set<int32_t>& id_set){
@@ -115,7 +116,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   //IndexVec tmp_vec = getNextIndex();
   print_operation(nextOP);
   //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
-  //maze->printWall(id, goalSet);
+  maze->printWall(id, goalSet);
   if(present_goal == id && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;
   }
