@@ -9,8 +9,12 @@
 #include <list>
 #include <set>
 #include <iterator>
+#include <chrono>
 #include "Parsue_Conf.h"
 #include "Cost.h"
+
+extern std::chrono::system_clock::time_point start_chrono, end_chrono;
+
 constexpr uint32_t WALL_AMOUNT = 2 * (2 * MAZE_SIZE * MAZE_SIZE);
 inline uint8_t bit_count(uint8_t byte){
   uint8_t b = byte & 0x0f;
@@ -283,12 +287,7 @@ class Node{
         node[i].edgeVec.clear();
       }
     }
-    NodeQueue<NodeIndex> search_neighbor_node(NodeIndex node){
-      return search_neighbor_node(node.get_my_id());
-    }
-    NodeQueue<NodeIndex> search_neighbor_node(int32_t serial_number, bool visible = false);
-    NodeQueue<NodeIndex> getPathQueue(int32_t start_id, int32_t end_id);
-    NodeQueue<NodeIndex> check_queue_quality(NodeQueue<NodeIndex>, bool visible = false);
+    NodeQueue<NodeIndex> getPathQueue(const int32_t& start_id, const int32_t& end_id);
     void updateNodeIndex(NodeIndex target_node, bool force_flag = false);
     void updateNodeIndex(NodeQueue<NodeIndex> node_queue, bool force_flag = false);
     NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);
@@ -309,9 +308,8 @@ class Node{
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 //void node_debug(NodeQueue<NodeIndex> poi);
-bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id);
-bool node_check(std::list<NodeIndex> node_list, int32_t end_id);
-int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set);
+bool node_check(const std::list<NodeIndex>& node_list, int32_t end_id);
+int32_t node_check(const std::list<NodeIndex>& node_list, const std::set<int32_t>& end_set);
 Direction node_relation(const int32_t &src, const int32_t &dst_index);
 
 #endif

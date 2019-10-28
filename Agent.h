@@ -18,7 +18,7 @@
  *
  *	迷路情報は外に保存をするが、Agent::updateを通して更新をしていく
  **************************************************************/
-constexpr int32_t GOAL = 2 * MAZE_SIZE * 7 + 2 * 7;
+constexpr int32_t GOAL = 2 * MAZE_SIZE * 9 + 2 * 6;
 extern std::set<int32_t> GOAL_LIST;
 class Agent {
 public:

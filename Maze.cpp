@@ -1,5 +1,6 @@
 #include "Maze.h"
 WallStr<WALL_AMOUNT> WallData;
+std::chrono::system_clock::time_point start_chrono, end_chrono;
 
 Direction Maze::getWall(int8_t x, int8_t y){
   Direction dir;
@@ -364,56 +365,9 @@ std::list<NodeIndex> Node::getNeighborNode(int32_t present_number, bool visible)
   return checkQueueQuality(node_list, visible);
 }
 
-NodeQueue<NodeIndex> Node::search_neighbor_node(int32_t present_number, bool visible){
-  //NOT USED!!!!!!!!!!
-  NodeQueue<NodeIndex> node_queue;
-  //Also return the edge node
-  //->To check corner
-  //NORTH
-  if(present_number % 2 == 0){
-    if((uint32_t) present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
-      //NORTH
-      node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE));
-      //NE
-      node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE + 1));
-      //NW
-      if(present_number % (2 * MAZE_SIZE) != 0)
-        node_queue.push(NodeIndex(node, present_number + 2 * MAZE_SIZE - 1));
-    }
-    if((uint32_t) present_number > 2 * MAZE_SIZE - 1){
-      //SOUTH
-      node_queue.push(NodeIndex(node, present_number - 2 * MAZE_SIZE));
-    }
-    //SE
-    node_queue.push(NodeIndex(node, present_number + 1));
-    //SW
-    if(present_number % (2 * MAZE_SIZE) != 0)
-      node_queue.push(NodeIndex(node, present_number - 1));
-  }
-  //EAST
-  else{
-    if(present_number % (2 * MAZE_SIZE) != 2 * MAZE_SIZE - 1){
-      //EAST
-      node_queue.push(NodeIndex(node, present_number + 2));
-      //NE
-      node_queue.push(NodeIndex(node, present_number + 1));
-      //SE
-      if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
-        node_queue.push(NodeIndex(node, present_number + 1 - 2 * MAZE_SIZE));
-    }
-    //NW
-    node_queue.push(NodeIndex(node, present_number - 1));
-    if(present_number % 64 != 1){
-      //WEST
-      node_queue.push(NodeIndex(node, present_number - 2));
-    }
-    //SW
-    if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
-      node_queue.push(NodeIndex(node, present_number - 1 - 2 * MAZE_SIZE));
-  }
-  return check_queue_quality(node_queue, visible);
-}
 int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end_set, bool visible){
+  start_chrono = std::chrono::system_clock::now();
+
   clear();
   NodeQueue<NodeIndex> node_queue;
   node[start_id].set_info(start_id, 0);
@@ -422,6 +376,7 @@ int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end
   int32_t flag = node_check(node_list, end_set);
   while(flag < 0){
     while(!node_queue.empty()){
+      printf("queue size is %d \n", node_queue.size());
       NodeIndex top_index = node_queue.top();
       node_queue.pop();
       auto new_list = getNeighborNode(top_index.get_my_id(), visible);
@@ -430,6 +385,10 @@ int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end
       if(flag >= 0)  break;
     }
   }
+  end_chrono = std::chrono::system_clock::now();
+
+  double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
+  printf("time %lf[ms]\n", time);
   return flag;
 }
 
@@ -465,7 +424,7 @@ int32_t Node::startFastestMap(const int32_t &start_id, const int32_t &end_id, bo
   return startFastestMap(start_id, id_set, visible);
 }
 
-NodeQueue<NodeIndex> Node::getPathQueue(int32_t start_id, int32_t end_id){
+NodeQueue<NodeIndex> Node::getPathQueue(const int32_t& start_id, const int32_t& end_id){
   NodeQueue<NodeIndex> node_queue;
   node_queue.push(NodeIndex(node, end_id));
   auto po = get_node(end_id).get_mother_id();
@@ -491,24 +450,6 @@ std::set<int32_t> Node::getUnknownFastestWall(const int32_t &start_id, const int
   return check_set;
 }
 
-NodeQueue<NodeIndex> Node::check_queue_quality(NodeQueue<NodeIndex> target_queue, bool visible){
-  NodeQueue<NodeIndex> que;
-  while(!target_queue.empty()){
-    NodeIndex top_node = target_queue.top();
-    int32_t top_id = top_node.get_my_id();
-    //printf("top_id is %d\n", top_id);
-    if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() > 5000){
-      if(visible == true && node[top_id].get_wall_visible() == false){
-        //printf("wrong top id %d \n", top_id);
-      }
-      //if(visible == true && node[top_id].get_wall_visible() == false) continue;
-      else  que.push(top_node);
-    }
-    target_queue.pop();
-  }
-  //printf("check finished\n");
-  return que;
-}
 std::list<NodeIndex> Node::checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible){
   std::list<NodeIndex> node_list;
   for(auto itr = target_list.begin(); itr != target_list.end(); itr++){
@@ -565,13 +506,6 @@ void Node::updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeInd
     }
   }
 }
-NodeQueue<NodeIndex> Node::expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex> dst_queue){
-  while(!dst_queue.empty()){
-    src_queue.push(dst_queue.top());
-    dst_queue.pop();
-  }
-  return src_queue;
-}
 
 /*
 NodeQueue<NodeInfo> Node::queueTask(int32_t start_id){
@@ -592,16 +526,7 @@ void node_debug(NodeQueue<NodeInfo> poi){
   }
 }
 */
-bool node_check(NodeQueue<NodeIndex> node_queue, int32_t end_id){
-  while(!node_queue.empty()){
-    NodeIndex hoge = node_queue.top();
-    if(hoge.get_my_id() == end_id)
-      return true;
-    node_queue.pop();
-  }
-  return false;
-}
-bool node_check(std::list<NodeIndex> node_list, int32_t end_id){
+bool node_check(const std::list<NodeIndex>& node_list, const int32_t& end_id){
   for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
     NodeIndex hoge = *itr;
     if(hoge.get_my_id() == end_id)
@@ -609,7 +534,7 @@ bool node_check(std::list<NodeIndex> node_list, int32_t end_id){
   }
   return false;
 }
-int32_t node_check(std::list<NodeIndex> node_list, const std::set<int32_t>& end_set){
+int32_t node_check(const std::list<NodeIndex>& node_list, const std::set<int32_t>& end_set){
   for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
     NodeIndex hoge = *itr;
     if(end_set.find(hoge.get_my_id()) != end_set.end())
