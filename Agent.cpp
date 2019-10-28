@@ -32,7 +32,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   dist = vec;
   //auto lastOP = nextOP;
-  maze->updateWall(vec, dir);
+  maze->updateWall(vec, dir, false);
   if(node->get_node(present_goal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
     deleteGoal(present_goal);
     if(getGoalSize() == 0){

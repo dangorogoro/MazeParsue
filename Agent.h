@@ -67,6 +67,8 @@ public:
   inline Direction getNextDirection(){return presentRobotDir;}
   IndexVec getNextIndex();
   inline const State &getState() const {return state;}
+  inline void clearGoalVisible() const {node->get_node(present_goal).clear_wall_visible();}
+
   //void mazePrint(){maze->printWall();}
   //void mazePrint(int32_t id);
 };
