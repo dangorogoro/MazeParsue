@@ -41,14 +41,19 @@ int main(){
   dir = sampleData[po.x + 16 *(15 - po.y)];
   printf("wall is 0x%x\n", dir.byte);
   agent.update(po, dir.byte | 0xf0);
+  start_chrono = std::chrono::system_clock::now();
   while(1){
 
     po = agent.getNextIndex();
     dir = sampleData[po.x + 16 *(15 - po.y)];
     agent.update(po, dir.byte | 0xf0);
-    usleep(10 * 10 * 1000);
+    //usleep(10 * 10 * 1000);
     if(agent.getState() == Agent::FINISHED) break;
+
   }
+  end_chrono = std::chrono::system_clock::now();
+  double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
+  printf("time %lf[ms]\n", time);
   //node.startEdgeMap(0, GOAL, true);
   node.startFastestMap(0, GOAL, true);
   auto ans_path = node.getPathQueue(0, GOAL);

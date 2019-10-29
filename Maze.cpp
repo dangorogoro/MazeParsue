@@ -316,7 +316,62 @@ std::list<NodeIndex> Node::getOnLineNode(int32_t present_number, bool visible){
       //NE
       node_list.push_back(N
 */
-std::list<NodeIndex> Node::getNeighborNode(int32_t present_number, bool visible){
+std::list<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
+  std::list<NodeIndex> node_list;
+  //Also return the edge node
+  //->To check corner
+  //NORTH
+  constexpr auto north_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
+  constexpr auto north_west[] = [-2 * MAZE_SIZE, 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
+  constexpr auto north_east[] = [-2 * MAZE_SIZE, -1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE];
+  constexpr auto east_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
+  constexpr auto east_south[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
+  constexpr auto east_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
+  if(present_number % 2 == 0){
+    if((uint32_t) present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
+      //NORTH
+      node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE));
+      //NE
+      node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE + 1));
+      //NW
+      if(present_number % (2 * MAZE_SIZE) != 0)
+        node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE - 1));
+    }
+    if((uint32_t) present_number > 2 * MAZE_SIZE - 1){
+      //SOUTH
+      node_list.push_back(NodeIndex(node, present_number - 2 * MAZE_SIZE));
+    }
+    //SE
+    node_list.push_back(NodeIndex(node, present_number + 1));
+    //SW
+    if(present_number % (2 * MAZE_SIZE) != 0)
+      node_list.push_back(NodeIndex(node, present_number - 1));
+  }
+  //EAST
+  else{
+    if(present_number % (2 * MAZE_SIZE) != 2 * MAZE_SIZE - 1){
+      //EAST
+      node_list.push_back(NodeIndex(node, present_number + 2));
+      //NE
+      node_list.push_back(NodeIndex(node, present_number + 1));
+      //SE
+      if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
+        node_list.push_back(NodeIndex(node, present_number + 1 - 2 * MAZE_SIZE));
+    }
+    //NW
+    node_list.push_back(NodeIndex(node, present_number - 1));
+    if(present_number % 64 != 1){
+      //WEST
+      node_list.push_back(NodeIndex(node, present_number - 2));
+    }
+    //SW
+    if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
+      node_list.push_back(NodeIndex(node, present_number - 1 - 2 * MAZE_SIZE));
+  }
+  return checkQueueQuality(node_list, visible);
+}
+#if 0
+std::list<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
   std::list<NodeIndex> node_list;
   //Also return the edge node
   //->To check corner
@@ -364,9 +419,10 @@ std::list<NodeIndex> Node::getNeighborNode(int32_t present_number, bool visible)
   }
   return checkQueueQuality(node_list, visible);
 }
+#endif
 
 int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end_set, bool visible){
-  start_chrono = std::chrono::system_clock::now();
+  //start_chrono = std::chrono::system_clock::now();
 
   clear();
   NodeQueue<NodeIndex> node_queue;
@@ -376,7 +432,7 @@ int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end
   int32_t flag = node_check(node_list, end_set);
   while(flag < 0){
     while(!node_queue.empty()){
-      printf("queue size is %d \n", node_queue.size());
+      //printf("queue size is %d \n", node_queue.size());
       NodeIndex top_index = node_queue.top();
       node_queue.pop();
       auto new_list = getNeighborNode(top_index.get_my_id(), visible);
@@ -385,10 +441,10 @@ int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end
       if(flag >= 0)  break;
     }
   }
-  end_chrono = std::chrono::system_clock::now();
+  //end_chrono = std::chrono::system_clock::now();
 
-  double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
-  printf("time %lf[ms]\n", time);
+  //double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
+  //printf("time %lf[ms]\n", time);
   return flag;
 }
 
@@ -460,10 +516,9 @@ std::list<NodeIndex> Node::checkQueueQuality(const std::list<NodeIndex> &target_
       if(visible == true && node[top_id].get_wall_visible() == false){
         //printf("wrong top id %d \n", top_id);
       }
-      else if(node[top_id].get_cost() != 65535){
+      else if(node[top_id].get_cost() == 65535){
+        node_list.push_back(top_node);
       }
-      //if(visible == true && node[top_id].get_wall_visible() == false) continue;
-      else  node_list.push_back(top_node);
     }
   }
   return node_list;

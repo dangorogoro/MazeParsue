@@ -302,7 +302,7 @@ class Node{
     std::list<NodeIndex> checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible = false);
 
     //std::list<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
-    std::list<NodeIndex> getNeighborNode(int32_t present_number, bool visible = false);
+    std::list<NodeIndex> getNeighborNode(const int32_t& present_number, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const std::set<int32_t> &end_set, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
