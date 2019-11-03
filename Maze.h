@@ -10,6 +10,7 @@
 #include <set>
 #include <iterator>
 #include <chrono>
+#include <algorithm>
 #include "Parsue_Conf.h"
 #include "Cost.h"
 
@@ -189,11 +190,32 @@ class Maze{
   public:
     Maze(std::bitset<WALL_AMOUNT> &wall): wall_pointer(&wall){clear();}
     inline Direction getWall(const IndexVec index) { return getWall(index.x, index.y); }
-    Direction getWall(int8_t x, int8_t y);
-    Direction getNORTH(int8_t x, int8_t y);
-    Direction getEAST(int8_t x, int8_t y);
-    Direction getWEST(int8_t x, int8_t y);
-    Direction getSOUTH(int8_t x, int8_t y);
+    inline Direction getWall(const int8_t& x, const int8_t& y){
+      Direction dir;
+      dir = getEAST(x,y) | getNORTH(x,y) | getWEST(x,y) | getSOUTH(x,y);
+      return dir;
+    }
+    inline Direction getNORTH(const int8_t& x, const int8_t& y){
+      uint8_t state = wall_pointer->test(NORTH_STATE(x, y));
+      uint8_t visible = wall_pointer->test(NORTH_VISIBLE(x, y));
+      return Direction((state ? NORTH : 0) | (visible ? DONE_NORTH : 0));
+    }
+    inline Direction getEAST(const int8_t& x, const int8_t& y){
+      if((uint8_t)x >= MAZE_SIZE - 1) return (EAST | DONE_EAST);
+      else{
+        uint8_t state = wall_pointer->test(EAST_STATE(x, y));
+        uint8_t visible = wall_pointer->test(EAST_VISIBLE(x, y));
+        return Direction((state ? EAST : 0) | (visible ? DONE_EAST: 0));
+      }
+    }
+    inline Direction getWEST(const int8_t& x, const int8_t& y){
+      if(x <= 0) return WEST | DONE_WEST;
+      else return getEAST(x - 1, y) << 0x02;
+    }
+    inline Direction getSOUTH(const int8_t& x, const int8_t& y){
+      if(y <= 0) return SOUTH | DONE_SOUTH;
+      else return getNORTH(x, y - 1) << 0x02;
+    }
     inline void updateWall(IndexVec index, Direction dir, bool forceWrite = true){ updateWall(index.x, index.y, dir, forceWrite);}
     void updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite = true);
     void printWall();
@@ -297,19 +319,19 @@ class Node{
     //void startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
-    void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
-    void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id);
-    std::list<NodeIndex> checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible = false);
+    void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
+    void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
+    void checkQueueQuality(std::vector<NodeIndex> &target_list, bool visible = false);
 
-    //std::list<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
-    std::list<NodeIndex> getNeighborNode(const int32_t& present_number, bool visible = false);
+    //std::vector<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
+    inline std::vector<NodeIndex> getNeighborNode(const int32_t& present_number, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const std::set<int32_t> &end_set, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 //void node_debug(NodeQueue<NodeIndex> poi);
-bool node_check(const std::list<NodeIndex>& node_list, int32_t end_id);
-int32_t node_check(const std::list<NodeIndex>& node_list, const std::set<int32_t>& end_set);
+bool node_check(const std::vector<NodeIndex>& node_list, int32_t end_id);
+int32_t node_check(const std::vector<NodeIndex>& node_list, const std::set<int32_t>& end_set);
 Direction node_relation(const int32_t &src, const int32_t &dst_index);
 
 #endif

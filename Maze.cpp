@@ -1,40 +1,7 @@
 #include "Maze.h"
+#include <array>
 WallStr<WALL_AMOUNT> WallData;
 std::chrono::system_clock::time_point start_chrono, end_chrono;
-
-Direction Maze::getWall(int8_t x, int8_t y){
-  Direction dir;
-  dir = getEAST(x,y) | getNORTH(x,y) | getWEST(x,y) | getSOUTH(x,y);
-  return dir;
-}
-Direction Maze::getNORTH(int8_t x, int8_t y){
-  Direction dir;
-  //NORTH
-  uint8_t state = wall_pointer->test(NORTH_STATE(x, y));
-  uint8_t visible = wall_pointer->test(NORTH_VISIBLE(x, y));
-  dir |= (state ? NORTH : 0) | (visible ? DONE_NORTH : 0);
-  return dir;
-}
-Direction Maze::getEAST(int8_t x, int8_t y){
-  Direction dir;
-  //EAST
-  if((uint8_t) x >= MAZE_SIZE - 1) dir = EAST | DONE_EAST;
-  else{
-    uint8_t state = wall_pointer->test(EAST_STATE(x, y));
-    uint8_t visible = wall_pointer->test(EAST_VISIBLE(x, y));
-    dir |= (state ? EAST : 0) | (visible ? DONE_EAST: 0);
-  }
-  return dir;
-}
-
-Direction Maze::getWEST(int8_t x, int8_t y){
-  if(x <= 0) return WEST | DONE_WEST;
-  else return getEAST(x - 1, y) << 0x02;
-}
-Direction Maze::getSOUTH(int8_t x, int8_t y){
-  if(y <= 0) return SOUTH | DONE_SOUTH;
-  else return getNORTH(x, y - 1) << 0x02;
-}
 void Maze::updateWall(int8_t x, int8_t y, Direction dir, bool forceWrite){
   Direction present_wall = getWall(x, y);
   if(!forceWrite && present_wall.isDoneAll()) return;
@@ -299,8 +266,8 @@ void Maze::loadFromArray(uint8_t* array){
   }
 }
 /*
-std::list<NodeIndex> Node::getOnLineNode(int32_t present_number, bool visible){
-  std::list<NodeIndex> node_list;
+std::vector<NodeIndex> Node::getOnLineNode(int32_t present_number, bool visible){
+  std::vector<NodeIndex> node_list;
   //NORTH
   if(present_number % 2 == 0){
     if((uint32_t) present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
@@ -316,63 +283,28 @@ std::list<NodeIndex> Node::getOnLineNode(int32_t present_number, bool visible){
       //NE
       node_list.push_back(N
 */
-std::list<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
-  std::list<NodeIndex> node_list;
+#if 1 
+inline std::vector<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
+  std::vector<NodeIndex> node_list;
+  node_list.reserve(6);
   //Also return the edge node
   //->To check corner
   //NORTH
-  constexpr auto north_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
-  constexpr auto north_west[] = [-2 * MAZE_SIZE, 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
-  constexpr auto north_east[] = [-2 * MAZE_SIZE, -1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE];
-  constexpr auto east_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
-  constexpr auto east_south[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
-  constexpr auto east_normal[] = [-2 * MAZE_SIZE, -1, 1, 2 * MAZE_SIZE - 1, 2 * MAZE_SIZE, 2 * MAZE_SIZE + 1];
-  if(present_number % 2 == 0){
-    if((uint32_t) present_number < WALL_AMOUNT - 2 * MAZE_SIZE){
-      //NORTH
-      node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE));
-      //NE
-      node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE + 1));
-      //NW
-      if(present_number % (2 * MAZE_SIZE) != 0)
-        node_list.push_back(NodeIndex(node, present_number + 2 * MAZE_SIZE - 1));
+  constexpr std::array<int32_t, 6> north_edge = {-2 * (int16_t)MAZE_SIZE, -1, 1, 2 * (int16_t)MAZE_SIZE - 1, 2 * (int16_t)MAZE_SIZE, 2 * (int16_t)MAZE_SIZE + 1};
+  constexpr std::array<int32_t, 6> east_edge = {-2 * (int16_t)MAZE_SIZE - 1 , -2 * (int16_t)MAZE_SIZE + 1, -2, -1, 1, 2};
+  auto& edge_list = (present_number % 2 == 0) ? north_edge : east_edge;
+  for(auto itr = edge_list.begin(); itr != edge_list.end(); itr++){
+    auto target_id = present_number + *itr;
+    if(target_id < (int32_t)WALL_AMOUNT && target_id >= 0){
+      node_list.push_back(NodeIndex(node, target_id));
     }
-    if((uint32_t) present_number > 2 * MAZE_SIZE - 1){
-      //SOUTH
-      node_list.push_back(NodeIndex(node, present_number - 2 * MAZE_SIZE));
-    }
-    //SE
-    node_list.push_back(NodeIndex(node, present_number + 1));
-    //SW
-    if(present_number % (2 * MAZE_SIZE) != 0)
-      node_list.push_back(NodeIndex(node, present_number - 1));
   }
-  //EAST
-  else{
-    if(present_number % (2 * MAZE_SIZE) != 2 * MAZE_SIZE - 1){
-      //EAST
-      node_list.push_back(NodeIndex(node, present_number + 2));
-      //NE
-      node_list.push_back(NodeIndex(node, present_number + 1));
-      //SE
-      if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
-        node_list.push_back(NodeIndex(node, present_number + 1 - 2 * MAZE_SIZE));
-    }
-    //NW
-    node_list.push_back(NodeIndex(node, present_number - 1));
-    if(present_number % 64 != 1){
-      //WEST
-      node_list.push_back(NodeIndex(node, present_number - 2));
-    }
-    //SW
-    if((uint32_t) present_number > 2 * MAZE_SIZE - 1)
-      node_list.push_back(NodeIndex(node, present_number - 1 - 2 * MAZE_SIZE));
-  }
-  return checkQueueQuality(node_list, visible);
+  checkQueueQuality(node_list, visible);
+  return node_list;
 }
-#if 0
-std::list<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
-  std::list<NodeIndex> node_list;
+#else
+std::vector<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool visible){
+  std::vector<NodeIndex> node_list;
   //Also return the edge node
   //->To check corner
   //NORTH
@@ -420,7 +352,6 @@ std::list<NodeIndex> Node::getNeighborNode(const int32_t& present_number, bool v
   return checkQueueQuality(node_list, visible);
 }
 #endif
-
 int32_t Node::startEdgeMap(const int32_t& start_id, const std::set<int32_t>& end_set, bool visible){
   //start_chrono = std::chrono::system_clock::now();
 
@@ -506,24 +437,25 @@ std::set<int32_t> Node::getUnknownFastestWall(const int32_t &start_id, const int
   return check_set;
 }
 
-std::list<NodeIndex> Node::checkQueueQuality(const std::list<NodeIndex> &target_list, bool visible){
-  std::list<NodeIndex> node_list;
+void Node::checkQueueQuality(std::vector<NodeIndex> &target_list, bool visible){
+  auto removeIt = remove_if(target_list.begin(), target_list.end(), [&](NodeIndex top_node) {
+      int32_t top_id = top_node.get_my_id();
+      return  ((node[top_id].get_wall_state() == 1 || node[top_id].isCorner()) || ((visible == true && node[top_id].get_wall_visible() == false) || (node[top_id].get_cost() != 65535)));
+  });
+  target_list.erase(removeIt, target_list.end());
+  /*
   for(auto itr = target_list.begin(); itr != target_list.end(); itr++){
     auto top_node = *itr;
     int32_t top_id = top_node.get_my_id();
-    //if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner() && node[top_id].get_cost() == 65535){
     if(node[top_id].get_wall_state() == 0 && !node[top_id].isCorner()){
-      if(visible == true && node[top_id].get_wall_visible() == false){
-        //printf("wrong top id %d \n", top_id);
-      }
-      else if(node[top_id].get_cost() == 65535){
+      if(!(visible == true && node[top_id].get_wall_visible() == false) && (node[top_id].get_cost() == 65535)){
         node_list.push_back(top_node);
       }
     }
   }
-  return node_list;
+      */
 }
-void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id){
+void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id){
   EdgeVec motherEdge = node[mother_id].get_edgeVec();
   for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
     NodeIndex top_index = *itr;
@@ -548,7 +480,7 @@ void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::list<
     }
   }
 }
-void Node::updateQueue(NodeQueue<NodeIndex> &node_queue, const std::list<NodeIndex> &node_list, int32_t mother_id){
+void Node::updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id){
   //update cost of NodeInfo
   //set mother id to node in the priority queue
   uint32_t cost = 1;
@@ -581,7 +513,7 @@ void node_debug(NodeQueue<NodeInfo> poi){
   }
 }
 */
-bool node_check(const std::list<NodeIndex>& node_list, const int32_t& end_id){
+bool node_check(const std::vector<NodeIndex>& node_list, const int32_t& end_id){
   for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
     NodeIndex hoge = *itr;
     if(hoge.get_my_id() == end_id)
@@ -589,7 +521,7 @@ bool node_check(const std::list<NodeIndex>& node_list, const int32_t& end_id){
   }
   return false;
 }
-int32_t node_check(const std::list<NodeIndex>& node_list, const std::set<int32_t>& end_set){
+int32_t node_check(const std::vector<NodeIndex>& node_list, const std::set<int32_t>& end_set){
   for(auto itr = node_list.begin(); itr != node_list.end(); itr++){
     NodeIndex hoge = *itr;
     if(end_set.find(hoge.get_my_id()) != end_set.end())
