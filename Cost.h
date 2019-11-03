@@ -34,8 +34,8 @@ constexpr Real cost_solve_impl(const std::uint32_t &i, const bool &diagonal) noe
   if(field_length > offset_length)  return ((field_length - offset_length) / max_forward_velocity + offset_time) * 1000;
   else{
     field_length /= 2.0;
-    float v2 = max_turn_velocity * max_turn_velocity + 2 * accel * field_length;
-    return (sqrt(v2) - max_turn_velocity) / accel * 1000 * 2.0;
+    float v2 = max_turn_velocity * max_turn_velocity + 2 * accel * field_length * 1000;
+    return (sqrt(v2) - max_turn_velocity) / accel * 2.0;
   }
 }
 
