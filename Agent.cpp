@@ -114,7 +114,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   }
 
   //IndexVec tmp_vec = getNextIndex();
-  print_operation(nextOP);
+  //print_operation(nextOP);
   //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
   //maze->printWall(id, goalSet);
   if(present_goal == id && state == Agent::BACK_TO_START){
