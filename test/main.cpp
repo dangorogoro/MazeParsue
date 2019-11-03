@@ -32,8 +32,8 @@ int main(){
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  //auto sampleData = alljapan2011x_exp_fin;
-  auto sampleData = H2019_East;
+  auto sampleData = alljapan2011x_exp_fin;
+  //auto sampleData = H2019_East;
   dir = sampleData[0 + 16 * (15 - 1)];
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
   printf("============\n");
