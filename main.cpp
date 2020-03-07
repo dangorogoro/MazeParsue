@@ -12,6 +12,7 @@
 #include "Agent.h"
 int main(){
   
+  /*
   auto table = CostTable<uint32_t, 30>();
   //std::cout<<table.get(2)<<", "<<table.get(3)<<factorial<uint32_t, 10>(5)<<std::endl;
   for(size_t i = 0; i < 30; i++){
@@ -23,6 +24,7 @@ int main(){
   }
   std::cout<<std::endl;
   return 0;
+  */
 
   Maze maze(WallData);
   Node node;
