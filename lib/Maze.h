@@ -51,6 +51,8 @@ using WallStr = std::bitset<T>;
 extern WallStr<WALL_AMOUNT> WallData;
 template<class T>
 using NodeQueue = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template<class T>
+using NodePureQueue = std::queue<T>;
 struct NodeIndex;
 
 constexpr uint8_t EAST = 0x01;
@@ -334,8 +336,10 @@ class Node{
     //void startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
+    int32_t startPureEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false); 
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
+    void updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
     void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
     void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
     void checkQueueQuality(std::vector<NodeIndex> &target_list, bool visible = false);

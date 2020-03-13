@@ -65,7 +65,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     }
   }
   //node->start_edge_map(id, target_id);
-  present_goal = node->startEdgeMap(id, goalSet);
+  present_goal = node->startPureEdgeMap(id, goalSet);
   auto node_queue = node->getPathQueue(id, present_goal);
   auto dir_list = generateDirectionList(node_queue);
 

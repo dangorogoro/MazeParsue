@@ -48,6 +48,7 @@ int main(){
     dir = sampleData[po.x + 16 *(15 - po.y)];
     agent.update(po, dir.byte | 0xf0);
     //usleep(10 * 10 * 1000);
+    //maze.printWall(node);
     if(agent.getState() == Agent::FINISHED) break;
 
   }
@@ -60,38 +61,5 @@ int main(){
   maze.printWall(ans_path);
   maze.printWall(node);
   //print_operation(loadPath(ans_path,1));
-#if 0
-  /*
-  maze.updateWall(IndexVec(0, 2), 0xff);
-  maze.updateWall(IndexVec(1, 3), SOUTH | WEST | NORTH);
-  maze.updateWall(IndexVec(1, 2), NORTH);
-  maze.updateWall(IndexVec(1, 4), NORTH);
-  maze.updateWall(IndexVec(2, 4), NORTH);
-  */
-  maze.updateWall(IndexVec(1, 0), 0xff);
-  maze.updateWall(IndexVec(1, 1), 0xff);
-  maze.updateWall(IndexVec(3, 1), 0xff);
-  maze.updateWall(IndexVec(3, 2), 0xff);
-  node.start_edge_map(0,9);
-  auto ans_path = node.getPathQueue(0,9);
-  auto runSequence = loadPath(ans_path, 1);
-#endif 
-//  maze.loadFromArray(Data);
-//  node.start_edge_map(6, 64 * 7 + 2 * 8);
-//  auto ans_path = node.getPathQueue(6, 64 * 7 + 2 * 8 - 1);
-//  maze.printWall(ans_path);
-//  auto runSequence = loadPath(ans_path, 1);
-//  print_operation(runSequence);
-//  node.start_edge_map(65, 64 * 7 + 2 * 8);
-//  ans_path = node.getPathQueue(65, 64 * 7 + 2 * 8 - 1);
-//  maze.printWall(ans_path);
-
-  /*
-  printf("0x%x\n", node_relation(NodeIndex(&pi, 66), NodeIndex(&pi, 67)));
-  printf("0x%x\n", node_relation(NodeIndex(&pi, 67), NodeIndex(&pi, 66)));
-  printf("0x%x\n", node_relation(NodeIndex(&pi, 66), NodeIndex(&pi, 65)));
-  printf("0x%x\n", node_relation(NodeIndex(&pi, 65), NodeIndex(&pi, 66)));
-  */
-
   return 0;
 }
