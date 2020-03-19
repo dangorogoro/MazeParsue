@@ -265,22 +265,44 @@ void Maze::loadFromArray(uint8_t* array){
       updateWall(i % (MAZE_SIZE / 2), MAZE_SIZE / 2  - i / (MAZE_SIZE / 2) - 1, Direction(array[i]));
   }
 }
-inline NeighborIndexArray Node::getNeighborNode(const int32_t& present_number, bool visible){
+NeighborIndexArray Node::getDirectedNeighborNode(const int32_t& present_number, const Direction& dir, bool visible){
   NeighborIndexArray neighbor_array(node);
-  //Also return the edge node
-  //->To check corner
-  //NORTH
-  constexpr std::array<int32_t, 6> north_edge = {-2 * (int16_t)MAZE_SIZE, -1, 1, 2 * (int16_t)MAZE_SIZE - 1, 2 * (int16_t)MAZE_SIZE, 2 * (int16_t)MAZE_SIZE + 1};
-  constexpr std::array<int32_t, 6> east_edge = {-2 * (int16_t)MAZE_SIZE - 1 , -2 * (int16_t)MAZE_SIZE + 1, -2, -1, 1, 2};
-  auto& edge_list = (present_number % 2 == 0) ? north_edge : east_edge;
-  for(auto itr = edge_list.begin(); itr != edge_list.end(); itr++){
+  std::array<int32_t, 6> north_edge = {-1, 0, 1};
+  std::array<int32_t, 6> east_edge = {1, 1, 2};
+  auto& edge_array = (present_number % 2 == 0) ? north_edge : east_edge;
+  if((dir == NORTH) || (dir == SOUTH)){
+    int32_t offset = (dir == NORTH) ? MAZE_SIZE * 2 : - MAZE_SIZE * 2;
+    for(auto itr = edge_array.begin(); itr != edge_array.end(); itr++) *itr += offset;
+  }
+  else if((dir == EAST) || (dir == WEST)){
+    if(dir == WEST) for(auto itr = edge_array.begin(); itr != edge_array.end(); itr++) *itr = -*itr;
+    edge_array[0] -= MAZE_SIZE * 2;
+  }
+  for(auto itr = edge_array.begin(); itr != edge_array.end(); itr++){
     auto target_id = present_number + *itr;
     auto current_index = neighbor_array.get_correct_size();
     if(target_id < (int32_t)WALL_AMOUNT && target_id >= 0 && checkQueueQuality(target_id, visible)){
       neighbor_array.set(current_index, target_id);
       neighbor_array.increment_correct_size();
     }
-
+  }
+  return neighbor_array;
+}
+inline NeighborIndexArray Node::getNeighborNode(const int32_t& present_number, bool visible){
+  NeighborIndexArray neighbor_array(node);
+  //Also return the edge node
+  //->To check corner
+  //サイズは4でもいける気がする
+  constexpr std::array<int32_t, 6> north_edge = {-2 * (int16_t)MAZE_SIZE, -1, 1, 2 * (int16_t)MAZE_SIZE - 1, 2 * (int16_t)MAZE_SIZE, 2 * (int16_t)MAZE_SIZE + 1};
+  constexpr std::array<int32_t, 6> east_edge = {-2 * (int16_t)MAZE_SIZE - 1 , -2 * (int16_t)MAZE_SIZE + 1, -2, -1, 1, 2};
+  auto& edge_array = (present_number % 2 == 0) ? north_edge : east_edge;
+  for(auto itr = edge_array.begin(); itr != edge_array.end(); itr++){
+    auto target_id = present_number + *itr;
+    auto current_index = neighbor_array.get_correct_size();
+    if(target_id < (int32_t)WALL_AMOUNT && target_id >= 0 && checkQueueQuality(target_id, visible)){
+      neighbor_array.set(current_index, target_id);
+      neighbor_array.increment_correct_size();
+    }
   }
   return neighbor_array;
 }
@@ -566,19 +588,3 @@ Direction node_relation(const int32_t &src_index, const int32_t &dst_index){
   }
   return dir;
 }
-
-
-/*
-OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
-
-  NodeIndex last_node = node_queue.top();
-  while(!node_queue.empty()){
-    node_queue.pop();
-    NodeIndex present_node = node_queue.top();
-  }
-}
-*/
-/*
-   void Node::update_queue(std::priority_queue<uint32_t, std::vector<uint32_t>, std::greater<uint32_t>> queue){
-   }
-   */

@@ -347,6 +347,7 @@ class Node{
     //std::vector<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
     //inline std::vector<NodeIndex> getNeighborNode(const int32_t& present_number, bool visible = false);
     inline NeighborIndexArray getNeighborNode(const int32_t& present_number, bool visible = false);
+    NeighborIndexArray getDirectedNeighborNode(const int32_t& present_number, const Direction& dir, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const std::set<int32_t> &end_set, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
