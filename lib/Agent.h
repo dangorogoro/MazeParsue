@@ -38,7 +38,7 @@ private:
 	//現在目指している目標座標
 	IndexVec dist;
 
-  int32_t id;
+  int32_t currentID;
 
 	//目標座標リスト
 	std::list<IndexVec> distIndexList;
@@ -50,7 +50,8 @@ private:
 
   Operation nextOP;
   std::set<int32_t> goalSet;
-  int32_t present_goal;
+  int32_t presentGoal;
+  bool foresightFlag;
 public:
 	Agent(Maze &_maze, Node &_node) :maze(&_maze), node(&_node), state(Agent::IDLE){ reset(); }
   inline void addGoal(const int32_t &id){goalSet.insert(id);}
@@ -67,12 +68,22 @@ public:
   inline Direction getNextDirection(){return presentRobotDir;}
   IndexVec getNextIndex();
   inline const State &getState() const {return state;}
-  inline void clearGoalVisible() const {node->get_node(present_goal).clear_wall_visible();}
+  inline void clearGoalVisible() const {node->get_node(presentGoal).clear_wall_visible();}
+  inline bool foresightIsDone() const {return foresightFlag;}
+  void determinedFutureCalc();
 
   //void mazePrint(){maze->printWall();}
   //void mazePrint(int32_t id);
 };
 
+struct pattern{
+  int32_t nextID;
+  int32_t presentGoal;
+};
+
+struct directionPatternData{
+  
+};
 
 
 #endif /* AGENT_H_ */
