@@ -81,4 +81,6 @@ std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue);
 Operation getTurnOperation(Direction first_dir, Direction second_dir, Operation::OperationType type);
 void print_operation(Operation op);
 void print_operation(OperationList list);
+int32_t calc_id_from_operation(const int32_t& currentID, const Direction& dir, const Operation& nextOP);
+Direction calc_dir_from_operation(const Direction& dir, const Operation& nextOP);
 #endif /* OPERATION_H_ */

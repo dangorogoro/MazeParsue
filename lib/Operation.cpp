@@ -186,3 +186,51 @@ void print_operation(OperationList runSequence){
     printf(" -> %d\n", runSequence[i].n);
   }
 }
+
+int32_t calc_id_from_operation(const int32_t& currentID, const Direction& dir, const Operation& nextOP){
+  //NORTH
+  if(nextOP.op == Operation::FORWARD){
+    int32_t offset = 0;
+    if(dir == NORTH || dir == SOUTH)  offset = (dir == NORTH) ? MAZE_SIZE * 2 : -MAZE_SIZE * 2;
+    else if(dir == WEST || dir == EAST)  offset = (dir == EAST) ? 2 : -2;
+    return currentID + offset * nextOP.n;
+  }
+  else if(nextOP.op == Operation::BACK_180) return currentID;
+  else if(nextOP.op == Operation::TURN_RIGHT90S || nextOP.op == Operation::TURN_RIGHT90){
+    if(dir == NORTH)  return currentID + MAZE_SIZE * 2 + 1;
+    else if(dir == SOUTH || dir == WEST)  return currentID - 1;
+    else if(dir == EAST)  return currentID + 1;
+  }
+  else if(nextOP.op == Operation::TURN_LEFT90S || nextOP.op == Operation::TURN_LEFT90){
+    if(dir == NORTH)  return currentID + MAZE_SIZE * 2 - 1;
+    else if(dir == SOUTH || dir == WEST)  return currentID + 1;
+    else if(dir == EAST)  return currentID - 1;
+  }
+  //if nothing
+  printf("error\n");
+  return currentID;
+}
+Direction calc_dir_from_operation(const Direction& dir, const Operation& nextOP){
+  if(nextOP.op == Operation::FORWARD) return dir;
+  else if(nextOP.op == Operation::TURN_RIGHT90S || nextOP.op == Operation::TURN_RIGHT90){
+    if(dir == NORTH)  return EAST;
+    else if(dir == EAST) return SOUTH;
+    else if(dir == SOUTH) return WEST;
+    else if(dir == WEST) return NORTH;
+  }
+  else if(nextOP.op == Operation::TURN_LEFT90S || nextOP.op == Operation::TURN_LEFT90){
+    if(dir == NORTH)  return WEST;
+    else if(dir == WEST) return SOUTH;
+    else if(dir == SOUTH) return EAST;
+    else if(dir == EAST) return NORTH;
+  }
+  else if(nextOP.op == Operation::BACK_180){
+    if(dir == NORTH)  return SOUTH;
+    else if(dir == SOUTH) return NORTH;
+    else if(dir == EAST) return WEST;
+    else if(dir == WEST) return EAST;
+  }
+  //if nothing
+  printf("error\n");
+  return dir;
+}
