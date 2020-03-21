@@ -160,4 +160,7 @@ void Agent::determinedFutureCalc(){
     if(bit_count(next_dir) == 2)  presentRobotDir = next_dir - (presentRobotDir & next_dir);
   }
 }
-
+void futurePattern::push(const Direction &dir, const Operation &op){
+  patternPair tmp(dir, op);
+  future_pattern.push(tmp);
+}

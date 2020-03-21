@@ -76,14 +76,16 @@ public:
   //void mazePrint(int32_t id);
 };
 
-struct pattern{
-  int32_t nextID;
-  int32_t presentGoal;
+using patternPair = std::pair<Direction, Operation>;
+struct futurePattern{
+  private:
+    std::queue<patternPair> future_pattern;
+  public:
+    futurePattern(){}
+    Operation get_next_operation(const Direction &dir);
+    inline void push(const Direction &dir, const Operation &op);
+    inline void pop(){future_pattern.pop();}
+    inline patternPair front()const {return future_pattern.front();}
+    inline bool empty()const {return future_pattern.empty();}
 };
-
-struct directionPatternData{
-  
-};
-
-
 #endif /* AGENT_H_ */
