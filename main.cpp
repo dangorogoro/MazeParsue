@@ -35,19 +35,17 @@ int main(){
   auto sampleData = alljapan2011x_exp_fin;
   //auto sampleData = H2019_East;
   dir = sampleData[0 + 16 * (15 - 1)];
+  agent.futureCalc();
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
-  printf("============\n");
-  po = agent.getNextIndex();
-  dir = sampleData[po.x + 16 *(15 - po.y)];
-  printf("wall is 0x%x\n", dir.byte);
-  agent.update(po, dir.byte | 0xf0);
   start_chrono = std::chrono::system_clock::now();
   while(1){
 
     po = agent.getNextIndex();
     dir = sampleData[po.x + 16 *(15 - po.y)];
+    //なにかの事前計算
+    agent.futureCalc();
     agent.update(po, dir.byte | 0xf0);
-    //usleep(10 * 10 * 1000);
+    usleep(10 * 10 * 1000);
     //maze.printWall(node);
     if(agent.getState() == Agent::FINISHED) break;
 
