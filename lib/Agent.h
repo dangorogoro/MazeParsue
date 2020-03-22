@@ -20,6 +20,33 @@
  **************************************************************/
 constexpr int32_t GOAL = 2 * MAZE_SIZE * 7 + 2 * 7;
 extern std::set<int32_t> GOAL_LIST;
+
+//using patternPair = std::pair<Direction, Operation>;
+struct patternInfo{
+  private:
+    Direction dir;
+    Operation op;
+    int32_t goal;
+  public:
+    patternInfo(){}
+    patternInfo(const Direction &_dir, const Operation &_op, const int32_t &_goal) :dir(_dir), op(_op), goal(_goal){}
+    inline Direction get_dir()const {return dir;}
+    inline Operation get_op()const {return op;}
+    inline int32_t get_goal()const {return goal;}
+};
+struct futurePattern{
+  private:
+    std::queue<patternInfo> future_pattern;
+  public:
+    futurePattern(){}
+    Operation get_next_operation(const Direction &dir);
+    inline void push(const Direction &wall, const Operation &op, const int32_t &goal);
+    inline void pop(){future_pattern.pop();}
+    inline patternInfo front()const {return future_pattern.front();}
+    inline bool empty()const {return future_pattern.empty();}
+    void debug_print();
+};
+
 class Agent {
 public:
 	typedef enum {
@@ -52,6 +79,7 @@ private:
   std::set<int32_t> goalSet;
   int32_t presentGoal;
   bool foresightFlag;
+  futurePattern future_pattern;
 public:
 	Agent(Maze &_maze, Node &_node) :maze(&_maze), node(&_node), state(Agent::IDLE){ reset(); }
   inline void addGoal(const int32_t &id){goalSet.insert(id);}
@@ -64,28 +92,18 @@ public:
 	void reset();
 
 	void update(const IndexVec &cur, const Direction &cur_wall);
-  Operation getNextOperation();
+  inline Operation getNextOperation() const {return nextOP;}
   inline Direction getNextDirection(){return presentRobotDir;}
   IndexVec getNextIndex();
   inline const State &getState() const {return state;}
   inline void clearGoalVisible() const {node->get_node(presentGoal).clear_wall_visible();}
   inline bool foresightIsDone() const {return foresightFlag;}
   void determinedFutureCalc();
+  void futureCalc();
+  void drawFuture(const Direction &dir);
 
   //void mazePrint(){maze->printWall();}
   //void mazePrint(int32_t id);
 };
 
-using patternPair = std::pair<Direction, Operation>;
-struct futurePattern{
-  private:
-    std::queue<patternPair> future_pattern;
-  public:
-    futurePattern(){}
-    Operation get_next_operation(const Direction &dir);
-    inline void push(const Direction &dir, const Operation &op);
-    inline void pop(){future_pattern.pop();}
-    inline patternPair front()const {return future_pattern.front();}
-    inline bool empty()const {return future_pattern.empty();}
-};
 #endif /* AGENT_H_ */

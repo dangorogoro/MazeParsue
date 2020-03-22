@@ -22,6 +22,7 @@ void Agent::reset(){
   presentGoal = getGoal();
   node->get_node(presentGoal).clear_wall_visible();
   maze->updateWall(IndexVec(0,0), 0xfd);
+  foresightFlag = false;
 }
 void Agent::addGoal(const std::set<int32_t>& id_set){
   for(auto itr = id_set.begin(); itr != id_set.end(); itr++){
@@ -64,17 +65,16 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
       addGoal(0);
     }
   }
-  determinedFutureCalc();
-  //IndexVec tmp_vec = getNextIndex();
-  //print_operation(nextOP);
-  //printf("id == %d, (x,y) == (%d,%d)\n",id, tmp_vec.x, tmp_vec.y);
-  //maze->printWall(id, goalSet);
-  if(presentGoal == currentID && state == Agent::BACK_TO_START){
+  //determinedFutureCalc();
+  /////
+  //futureCalc();
+  /////
+  drawFuture(dir);
+  maze->printWall(currentID, goalSet);
+
+  if(currentID == 0 && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;
   }
-}
-Operation Agent::getNextOperation(){
-  return nextOP;
 }
 IndexVec Agent::getNextIndex(){
   uint16_t steps = nextOP.n;
@@ -120,10 +120,6 @@ void Agent::determinedFutureCalc(){
   auto next_dir = dir_list[0];
   nextOP = nextOperation(presentRobotDir, next_dir);
 
-  //printf("present dir is 0x%d\n", present_dir);
-  //printf("next dir is 0x%d\n", next_dir);
-  //printf("future dir is 0x%d\n", future_dir);
-
   lastRobotDir = presentRobotDir;
   if(uint8_t(next_dir & presentRobotDir) == 0){
     nextOP = Operation::BACK_180;
@@ -160,7 +156,101 @@ void Agent::determinedFutureCalc(){
     if(bit_count(next_dir) == 2)  presentRobotDir = next_dir - (presentRobotDir & next_dir);
   }
 }
-void futurePattern::push(const Direction &dir, const Operation &op){
-  patternPair tmp(dir, op);
-  future_pattern.push(tmp);
+void Agent::futureCalc(){
+  std::queue<NodeInfo> nodeInfoQueue;
+  std::queue<uint8_t> lastStateQueue;
+  //このQueueどうにかしろ
+  for(auto i = 0;i < 3;i++){
+    auto tmpGoal = node->startPureEdgeMap(currentID, goalSet);
+    if(tmpGoal < 0) break;
+    auto node_queue = node->getPathQueue(currentID, tmpGoal);
+    auto dir_list = generateDirectionList(node_queue);
+    Direction next_dir = dir_list[0];
+
+    node_queue.pop();
+    auto candidate_node_info = node->get_node(node_queue.top().get_my_id());
+
+    auto tmpNextOP = nextOperation(presentRobotDir, next_dir);
+    if(uint8_t(next_dir & presentRobotDir) == 0){
+      tmpNextOP = Operation::BACK_180;
+      break;
+    }
+    else{
+      if(tmpNextOP.op == Operation::FORWARD){
+        uint16_t count = 0;
+        while(!node_queue.empty()){
+          node_queue.pop();
+          count++;
+          auto top_node_info = node->get_node(node_queue.top().get_my_id());
+          if(count >= dir_list.size()){
+            break;
+          }
+          if(top_node_info.get_wall_state() == false && top_node_info.get_wall_visible() == true){
+            auto future_dir = dir_list[count];
+            if(future_dir == presentRobotDir){
+              tmpNextOP.n += 1;
+            }
+            else break;
+          }
+          else break;
+        }
+      }
+    }
+    if(next_dir == presentRobotDir) future_pattern.push(next_dir, tmpNextOP, tmpGoal);
+    else future_pattern.push(next_dir - presentRobotDir, tmpNextOP, tmpGoal);
+    if(candidate_node_info.get_wall_visible() == true) break;
+    lastStateQueue.push((candidate_node_info.get_wall_state() << 1) + candidate_node_info.get_wall_visible());
+    candidate_node_info.set_wall_state(true);
+    candidate_node_info.set_wall_visible(true);
+    nodeInfoQueue.push(candidate_node_info);
+  }
+  while(!nodeInfoQueue.empty()){
+    auto top_info = nodeInfoQueue.front();
+    auto last_state = lastStateQueue.front();
+    top_info.set_wall_state(last_state & 0x02);
+    top_info.set_wall_visible(last_state & 0x01);
+    nodeInfoQueue.pop();
+    lastStateQueue.pop();
+  }
+  foresightFlag = true;
+  //printf("nextID %d\n", currentID);
 }
+void Agent::drawFuture(const Direction &dir){
+  bool hit_flag = false;
+  Operation hit_op(Operation::BACK_180);
+
+  while(!future_pattern.empty()){
+    auto front_pattern = future_pattern.front();
+    auto tmp_byte = front_pattern.get_dir().byte;
+    //printf("tmp_byte 0x%x ", tmp_byte);
+    //printf("dir 0x%x \n", dir.byte);
+    if(hit_flag == false && (0 < ((~dir.byte) & tmp_byte))){
+      hit_flag = true;
+      hit_op = front_pattern.get_op();
+      presentGoal = front_pattern.get_goal();
+    }
+    future_pattern.pop();
+  }
+  lastRobotDir = presentRobotDir;
+  presentRobotDir = calc_dir_from_operation(presentRobotDir, hit_op);
+  nextOP = hit_op;
+  if(nextOP.op == Operation::BACK_180){
+    lastRobotDir = presentRobotDir;
+  }
+  currentID = calc_id_from_operation(currentID, lastRobotDir, nextOP);
+  print_operation(nextOP);
+  printf("currentID: %d\n", currentID);
+}
+void futurePattern::push(const Direction &wall, const Operation &op, const int32_t &goal){
+  future_pattern.push(patternInfo(wall, op, goal));
+}
+/*
+void futurePattern::debug_print(){
+  while(!future_pattern.empty()){
+    auto pair = future_pattern.front();
+    future_pattern.pop();
+    printf("future dir 0x%d: ", pair.first.byte);
+    print_operation(pair.second);
+  }
+}
+*/
