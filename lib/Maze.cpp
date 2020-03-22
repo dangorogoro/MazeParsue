@@ -345,6 +345,7 @@ int32_t Node::startPureEdgeMap(const int32_t &start_id, const std::set<int32_t>&
   updateQueue(node_queue, index_array, start_id);
   int32_t flag = node_check(index_array, end_set);
   while(flag < 0){
+    if(node_queue.empty() == true) return -1;
     while(!node_queue.empty()){
       //printf("queue size is %d \n", node_queue.size());
       NodeIndex top_index = node_queue.front();
@@ -353,6 +354,7 @@ int32_t Node::startPureEdgeMap(const int32_t &start_id, const std::set<int32_t>&
       updateQueue(node_queue, new_list, top_index.get_my_id());
       flag = node_check(new_list, end_set);
       if(flag >= 0)  break;
+      if(node_queue.empty() == true) return -1;
     }
   }
   //end_chrono = std::chrono::system_clock::now();

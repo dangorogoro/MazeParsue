@@ -275,6 +275,8 @@ struct NodeInfo{
     inline bool get_wall_state() const{return WallData.test(serial_number * 2);}
     inline bool get_wall_visible() const{return WallData.test(serial_number * 2 + 1);}
     inline void clear_wall_visible() const{WallData.reset(serial_number * 2 + 1);}
+    inline void set_wall_state(const bool& flag)const{WallData.set(serial_number * 2, flag);}
+    inline void set_wall_visible(const bool& flag)const{WallData.set(serial_number * 2 + 1, flag);}
 
     inline void set_info(const int32_t &mother, const uint32_t &cost_, EdgeVec edge_){
       set_info(mother, cost_);
