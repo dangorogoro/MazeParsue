@@ -162,7 +162,6 @@ void print_operation(Operation op){
   print_operation(opList);
 }
 void print_operation(OperationList runSequence){
-  printf("===============\n");
   for(size_t i = 0;i < runSequence.size();i++){
     if(runSequence[i].op == Operation::FORWARD) printf("FORWARD");
     else if(runSequence[i].op == Operation::FORWARD_DIAG)  printf("FORWARD_DIAG");
@@ -199,12 +198,12 @@ int32_t calc_id_from_operation(const int32_t& currentID, const Direction& dir, c
   else if(nextOP.op == Operation::TURN_RIGHT90S || nextOP.op == Operation::TURN_RIGHT90){
     if(dir == NORTH)  return currentID + MAZE_SIZE * 2 + 1;
     else if(dir == SOUTH || dir == WEST)  return currentID - 1;
-    else if(dir == EAST)  return currentID + 1;
+    else if(dir == EAST)  return currentID + 1 - MAZE_SIZE * 2;
   }
   else if(nextOP.op == Operation::TURN_LEFT90S || nextOP.op == Operation::TURN_LEFT90){
     if(dir == NORTH)  return currentID + MAZE_SIZE * 2 - 1;
-    else if(dir == SOUTH || dir == WEST)  return currentID + 1;
-    else if(dir == EAST)  return currentID - 1;
+    else if(dir == SOUTH || dir == EAST)  return currentID + 1;
+    else if(dir == WEST)  return currentID - 1 - MAZE_SIZE * 2;
   }
   //if nothing
   printf("error\n");
