@@ -414,7 +414,7 @@ std::set<int32_t> Node::getUnknownFastestWall(const int32_t &start_id, const int
   return check_set;
 }
 
-bool Node::checkQueueQuality(const int32_t& top_id, bool visible){
+inline bool Node::checkQueueQuality(const int32_t& top_id, bool visible){
   return  !((node[top_id].get_wall_state() == 1 || node[top_id].isCorner()) || ((visible == true && node[top_id].get_wall_visible() == false) || (node[top_id].get_cost() != 65535)));
 }
 void Node::checkQueueQuality(std::vector<NodeIndex> &target_list, bool visible){
@@ -445,7 +445,6 @@ void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIn
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost, nextEdge);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
@@ -466,7 +465,6 @@ void Node::updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vecto
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost, nextEdge);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %d mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
@@ -479,7 +477,6 @@ void Node::updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeI
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
@@ -492,7 +489,6 @@ void Node::updateQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArra
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
@@ -506,7 +502,6 @@ void Node::updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndex
     if(top_index.get_cost() > node[mother_id].get_cost() + cost){
       node[top_index.get_my_id()].set_info(mother_id, node[mother_id].get_cost() + cost);
       node_queue.push(top_index);
-      //printf("serial_number %d, cost %f mother %d\n", top_index.get_my_id(), top_index.get_cost(), node[top_index.get_my_id()].get_mother_id());
     }
   }
 }
@@ -529,13 +524,10 @@ void node_debug(NodeQueue<NodeInfo> poi){
   }
 }
 */
-bool node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id){
-  for(int32_t i = 0; i < neighbor_array.get_correct_size(); i++){
-    NodeIndex hoge = neighbor_array.get_node_array_index(i);
-    if(hoge.get_my_id() == end_id)
-      return true;
-  }
-  return false;
+int32_t node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id){
+  std::set<int32_t> id_set;
+  id_set.insert(end_id);
+  return node_check(neighbor_array, id_set);
 }
 int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int32_t>& end_set){
   for(int32_t i = 0; i < neighbor_array.get_correct_size(); i++){
@@ -546,13 +538,10 @@ int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int3
   return -1;
 }
 
-bool node_check(const std::vector<NodeIndex>& node_vector, const int32_t& end_id){
-  for(auto itr = node_vector.begin(); itr != node_vector.end(); itr++){
-    NodeIndex hoge = *itr;
-    if(hoge.get_my_id() == end_id)
-      return true;
-  }
-  return false;
+int32_t node_check(const std::vector<NodeIndex>& node_vector, const int32_t& end_id){
+  std::set<int32_t> id_set;
+  id_set.insert(end_id);
+  return node_check(node_vector, id_set);
 }
 int32_t node_check(const std::vector<NodeIndex>& node_vector, const std::set<int32_t>& end_set){
   for(auto itr = node_vector.begin(); itr != node_vector.end(); itr++){
