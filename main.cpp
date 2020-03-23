@@ -45,7 +45,7 @@ int main(){
     //なにかの事前計算
     agent.futureCalc();
     agent.update(po, dir.byte | 0xf0);
-    usleep(10 * 10 * 1000);
+    //usleep(10 * 10 * 1000);
     //maze.printWall(node);
     if(agent.getState() == Agent::FINISHED) break;
 

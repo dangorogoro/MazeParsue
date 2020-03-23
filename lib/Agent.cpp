@@ -70,7 +70,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
   //futureCalc();
   /////
   drawFuture(dir);
-  maze->printWall(currentID, goalSet);
+  //maze->printWall(currentID, goalSet);
 
   if(currentID == 0 && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;
@@ -238,8 +238,8 @@ void Agent::drawFuture(const Direction &dir){
     lastRobotDir = presentRobotDir;
   }
   currentID = calc_id_from_operation(currentID, lastRobotDir, nextOP);
-  print_operation(nextOP);
-  printf("currentID: %d\n", currentID);
+  //print_operation(nextOP);
+  //printf("currentID: %d\n", currentID);
 }
 void futurePattern::push(const Direction &wall, const Operation &op, const int32_t &goal){
   future_pattern.push(patternInfo(wall, op, goal));
