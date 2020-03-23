@@ -296,7 +296,7 @@ struct NodeIndex{
     NodeIndex(NodeInfo* node, int32_t index_) : node_pointer(node), index(index_){}
     inline bool operator<(const NodeIndex &obj) const{return node_pointer[index].get_cost() < obj.get_cost();}
     inline bool operator>(const NodeIndex &obj) const{return node_pointer[index].get_cost() > obj.get_cost();}
-    uint32_t get_cost()const {return node_pointer[index].get_cost();}
+    inline uint32_t get_cost()const {return node_pointer[index].get_cost();}
     int32_t get_my_id()const {return index;}
     EdgeVec get_edgeVec()const {return node_pointer[index].get_edgeVec();}
 };
@@ -306,11 +306,12 @@ struct NeighborIndexArray{
     int32_t correct_size;
     std::array<int32_t, 6> index_array;
   public:
-    NeighborIndexArray(NodeInfo* node) : node_pointer(node), correct_size(0){index_array.fill(0);}
-    void fill(const int32_t& value){index_array.fill(0);}
-    void set_correct_size(const int32_t& correct_size_){correct_size = correct_size_;}
-    void increment_correct_size(){correct_size++;}
-    int32_t get_correct_size()const {return correct_size;}
+    NeighborIndexArray(NodeInfo* node) : node_pointer(node){reset();}
+    inline void reset(){correct_size = 0; fill(0);}
+    inline void fill(const int32_t& value){index_array.fill(value);}
+    inline void set_correct_size(const int32_t& correct_size_){correct_size = correct_size_;}
+    inline void increment_correct_size(){correct_size++;}
+    inline int32_t get_correct_size()const {return correct_size;}
     NodeIndex get_node_array_index(int32_t array_index) const {return NodeIndex(node_pointer, index_array.at(array_index));}
     int32_t at(const int32_t& index) const{return index_array.at(index);}
     void set(const int32_t& index, const int32_t& value) {index_array[index] = value;}
@@ -341,13 +342,11 @@ class Node{
     int32_t startPureEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false); 
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
-    void updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
+    inline void updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
     void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
     void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
-    void checkQueueQuality(std::vector<NodeIndex> &target_list, bool visible = false);
-    inline bool checkQueueQuality(const int32_t& target_id, bool visible = false);
-    //std::vector<NodeIndex> getOnLineNode(int32_t present_number, bool visible = false);
-    //inline std::vector<NodeIndex> getNeighborNode(const int32_t& present_number, bool visible = false);
+    bool checkQueueQuality(const int32_t& root_id, const int32_t& target_id, bool visible = false);
+    void checkQueueQuality(const int32_t& root_id, std::vector<NodeIndex> &target_list, bool visible = false);
     inline NeighborIndexArray getNeighborNode(const int32_t& present_number, bool visible = false);
     NeighborIndexArray getDirectedNeighborNode(const int32_t& present_number, const Direction& dir, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
@@ -355,10 +354,9 @@ class Node{
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 //void node_debug(NodeQueue<NodeIndex> poi);
-int32_t node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id);
-int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int32_t>& end_set);
-int32_t node_check(const std::vector<NodeIndex>& node_list, int32_t end_id);
-int32_t node_check(const std::vector<NodeIndex>& node_list, const std::set<int32_t>& end_set);
+inline int32_t node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id);
+inline int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int32_t>& end_set);
 Direction node_relation(const int32_t &src, const int32_t &dst_index);
 
+void node_queue_debug(NodePureQueue<NodeIndex> node_queue);
 #endif
