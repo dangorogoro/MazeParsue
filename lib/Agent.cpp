@@ -5,7 +5,7 @@
 #include "Operation.h"
 
 //std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8 + 1, 64 * 7 + 2 * 8};
-std::set<int32_t> GOAL_LIST{GOAL};
+std::set<int32_t> GOAL_LIST{GOAL, GOAL + 2};
 //状態をIDLEにし、path関連を全てクリアする
 void Agent::reset(){
 	state = Agent::IDLE;
@@ -29,15 +29,52 @@ void Agent::addGoal(const std::set<int32_t>& id_set){
     goalSet.insert(*itr);
   }
 }
+bool Agent::getGoalBankrupt(){
+  for(auto itr = goalSet.begin();itr != goalSet.end();itr++){
+    if(node->get_node(*itr).get_wall_visible() == true) return true;
+    //if(node->get_node(*itr).get_visible_state() == true) return true;
+  }
+  return false;
+}
+
 void Agent::update(const IndexVec &vec, const Direction &dir){
   if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   dist = vec;
   //auto lastOP = nextOP;
   maze->updateWall(vec, dir, false);
+  if(node->get_node(presentGoal).get_wall_visible() == true && state != Agent::BACK_TO_START){
+    if(state == Agent::SEARCHING_NOT_GOAL){
+      while(node->get_node(getGoal()).get_wall_visible() == true){
+        deleteGoal(getGoal());
+        if(getGoalSize() == 0)  break;
+      }
+      if(getGoalSize() == 0){
+        goalSet = node->getUnknownFastestWall(0, GOAL);
+        state = Agent::SEARCHING_REACHED_GOAL;
+      }
+    }
+    if(state == Agent::SEARCHING_REACHED_GOAL){
+      //Care
+      if(getGoalBankrupt() == true){
+        //printf("New Path\n");
+        goalSet = node->getUnknownFastestWall(0, GOAL);
+      }
+      else deleteGoal(presentGoal);
+      if(getGoalSize() == 0){
+        state = Agent::BACK_TO_START;
+        addGoal(0);
+      }
+    }
+  }
+  /*
   if(node->get_node(presentGoal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
     deleteGoal(presentGoal);
+    printf("presentGoal is %d\n", presentGoal);
     if(getGoalSize() == 0){
       auto check_set = node->getUnknownFastestWall(0, GOAL);
+      printf("here\n");
+      maze->printWall(node->getPathQueue(0, GOAL));
+      printf("here\n");
       goalSet.merge(check_set);
       while(node->get_node(getGoal()).get_wall_visible() == true){
         deleteGoal(getGoal());
@@ -47,30 +84,40 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
         state = Agent::BACK_TO_START;
         addGoal(0);
       }
-      else  state = Agent::SEARCHING_REACHED_GOAL;
+      else{
+        state = Agent::SEARCHING_REACHED_GOAL;
+        printf("state is reached \n");
+        presentGoal = getGoal();
+      }
     }
   }
   else if(node->get_node(presentGoal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
-    deleteGoal(presentGoal);
+    printf("presentGoal is %d\n", presentGoal);
+    if(node->get_node(presentGoal).get_wall_state() == true){
+      printf("new path\n");
+      goalSet.clear();
+      goalSet = node->getUnknownFastestWall(0, GOAL);
+    }
+    else{
+      deleteGoal(presentGoal);
+      printf("else\n");
+    }
     while(node->get_node(getGoal()).get_wall_visible() == true){
       deleteGoal(getGoal());
       if(getGoalSize() == 0)  break;
     }
-    if(node->get_node(presentGoal).get_wall_state() == true){
-      goalSet.clear();
-      goalSet = node->getUnknownFastestWall(0, GOAL);
-    }
     if(getGoalSize() == 0){
-      state = Agent::BACK_TO_START;
-      addGoal(0);
+        state = Agent::BACK_TO_START;
+        addGoal(0);
     }
   }
+  */
   //determinedFutureCalc();
   /////
   //futureCalc();
   /////
-  drawFuture(dir);
   //maze->printWall(currentID, goalSet);
+  drawFuture(dir);
 
   if(currentID == 0 && state == Agent::BACK_TO_START){
     state = Agent::FINISHED;

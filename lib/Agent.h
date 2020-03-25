@@ -88,6 +88,7 @@ public:
   inline int32_t getGoal(){return *goalSet.begin();}
   int32_t getNearlyGoal();
   inline int32_t getGoalSize(){return goalSet.size();}
+  bool getGoalBankrupt();
 	//状態をIDLEにし、path関連を全てクリアする
 	void reset();
 
