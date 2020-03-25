@@ -337,25 +337,23 @@ class Node{
     
     std::set<int32_t> getUnknownFastestWall(const int32_t &start_id, const int32_t &end_id);
     //void startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
-    int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
     int32_t startEdgeMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
+    //int32_t startEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false);
     int32_t startPureEdgeMap(const int32_t &start_id, const std::set<int32_t>& end_set, bool visible = false); 
-    void updateQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
     void updateQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
-    inline void updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
-    void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const std::vector<NodeIndex> &node_list, const int32_t& mother_id);
+    void updateQueue(NodePureQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
+
     void updateFastestQueue(NodeQueue<NodeIndex> &node_queue, const NeighborIndexArray &neighbor_array, const int32_t& mother_id);
-    bool checkQueueQuality(const int32_t& root_id, const int32_t& target_id, bool visible = false);
-    void checkQueueQuality(const int32_t& root_id, std::vector<NodeIndex> &target_list, bool visible = false);
-    inline NeighborIndexArray getNeighborNode(const int32_t& present_number, bool visible = false);
+    inline bool checkQueueQuality(const int32_t& root_id, const int32_t& target_id, bool visible = false);
+    NeighborIndexArray getNeighborNode(const int32_t& present_number, bool visible = false);
     NeighborIndexArray getDirectedNeighborNode(const int32_t& present_number, const Direction& dir, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const int32_t &end_id, bool visible = false);
     int32_t startFastestMap(const int32_t &start_id, const std::set<int32_t> &end_set, bool visible = false);
     NodeInfo get_node(const int32_t &num) const {return node[num];}
 };
 //void node_debug(NodeQueue<NodeIndex> poi);
-inline int32_t node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id);
-inline int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int32_t>& end_set);
+int32_t node_check(const NeighborIndexArray& neighbor_array, const int32_t& end_id);
+int32_t node_check(const NeighborIndexArray& neighbor_array, const std::set<int32_t>& end_set);
 Direction node_relation(const int32_t &src, const int32_t &dst_index);
 
 void node_queue_debug(NodePureQueue<NodeIndex> node_queue);
