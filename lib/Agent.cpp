@@ -66,52 +66,6 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
       }
     }
   }
-  /*
-  if(node->get_node(presentGoal).get_wall_visible() == true && state == Agent::SEARCHING_NOT_GOAL){
-    deleteGoal(presentGoal);
-    printf("presentGoal is %d\n", presentGoal);
-    if(getGoalSize() == 0){
-      auto check_set = node->getUnknownFastestWall(0, GOAL);
-      printf("here\n");
-      maze->printWall(node->getPathQueue(0, GOAL));
-      printf("here\n");
-      goalSet.merge(check_set);
-      while(node->get_node(getGoal()).get_wall_visible() == true){
-        deleteGoal(getGoal());
-        if(getGoalSize() == 0)  break;
-      }
-      if(getGoalSize() == 0){
-        state = Agent::BACK_TO_START;
-        addGoal(0);
-      }
-      else{
-        state = Agent::SEARCHING_REACHED_GOAL;
-        printf("state is reached \n");
-        presentGoal = getGoal();
-      }
-    }
-  }
-  else if(node->get_node(presentGoal).get_wall_visible() == true && state == Agent::SEARCHING_REACHED_GOAL){
-    printf("presentGoal is %d\n", presentGoal);
-    if(node->get_node(presentGoal).get_wall_state() == true){
-      printf("new path\n");
-      goalSet.clear();
-      goalSet = node->getUnknownFastestWall(0, GOAL);
-    }
-    else{
-      deleteGoal(presentGoal);
-      printf("else\n");
-    }
-    while(node->get_node(getGoal()).get_wall_visible() == true){
-      deleteGoal(getGoal());
-      if(getGoalSize() == 0)  break;
-    }
-    if(getGoalSize() == 0){
-        state = Agent::BACK_TO_START;
-        addGoal(0);
-    }
-  }
-  */
   //determinedFutureCalc();
   /////
   //futureCalc();
@@ -263,6 +217,7 @@ void Agent::futureCalc(){
   //printf("nextID %d\n", currentID);
 }
 void Agent::drawFuture(const Direction &dir){
+  while(foresightIsDone() == false);
   bool hit_flag = false;
   Operation hit_op(Operation::BACK_180);
 
@@ -287,6 +242,7 @@ void Agent::drawFuture(const Direction &dir){
   currentID = calc_id_from_operation(currentID, lastRobotDir, nextOP);
   //print_operation(nextOP);
   //printf("currentID: %d\n", currentID);
+  foresightFlag = false;
 }
 void futurePattern::push(const Direction &wall, const Operation &op, const int32_t &goal){
   future_pattern.push(patternInfo(wall, op, goal));
