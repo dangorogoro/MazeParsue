@@ -101,7 +101,7 @@ void Maze::printWall(const Node& node){
 			//else std::printf("    ");
 			if(getWall(x,y).bits.North) std::printf("-----");
       else if(node.get_node(2 * MAZE_SIZE * y + 2 * x).get_cost() == 65535)  std::printf("     ");
-      else std::printf("%5d", node.get_node(2 * MAZE_SIZE * y + 2 * x).get_cost());
+      else std::printf("%5ld", node.get_node(2 * MAZE_SIZE * y + 2 * x).get_cost());
 		}
 		std::printf("+\r\n");
 
@@ -113,7 +113,7 @@ void Maze::printWall(const Node& node){
         std::printf(" ");
         if(getWall(x,y).bits.West) std::printf("  |  ");
         else if(node.get_node(2 * MAZE_SIZE * y + 2 * x - 1).get_cost() == 65535)  std::printf("     ");
-        else  std::printf("%5d", node.get_node(2 * MAZE_SIZE * y + 2 * x - 1).get_cost());
+        else  std::printf("%5ld", node.get_node(2 * MAZE_SIZE * y + 2 * x - 1).get_cost());
       }
 		}
 		std::printf("  |\r\n");
@@ -496,9 +496,9 @@ Direction node_relation(const int32_t &src_index, const int32_t &dst_index){
 }
 void node_queue_debug(NodePureQueue<NodeIndex> node_queue){
   auto tmp = node_queue;
-  printf("queue size is %ld \n  ", node_queue.size());
+  printf("queue size is %d \n  ", node_queue.size());
   while(!tmp.empty()){
-    printf("%d, ", tmp.front().get_my_id());
+    printf("%ld, ", tmp.front().get_my_id());
     tmp.pop();
   }
   printf("\n");

@@ -261,7 +261,7 @@ struct NodeInfo{
       return {IndexVec(x,y), dir};
     }
     void debug_info(){
-      printf("serial_number is %d, cost is %d\n", serial_number, cost);
+      printf("serial_number is %ld, cost is %ld\n", serial_number, cost);
     }
     bool isCorner() const{
       if((serial_number % (2 * MAZE_SIZE) == (2 * MAZE_SIZE - 1)) || (serial_number % 2 == 0 &&  (uint32_t)serial_number > WALL_AMOUNT - 2 * MAZE_SIZE))
