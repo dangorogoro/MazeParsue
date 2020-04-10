@@ -9,51 +9,129 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
   Direction last_dir = NORTH;
   Operation last_op(Operation::FORWARD);
   opList.push_back(last_op);
-  for(auto itr = dir_list.begin(); itr != dir_list.end(); itr++){
-    const Direction next_dir = *itr;
-    auto next_op = nextOperation(last_dir, next_dir);
-    if(last_op.op == Operation::FORWARD && next_op.op == Operation::FORWARD){
-      auto back_vec = opList.back();
-      opList.pop_back();
-      opList.push_back(Operation(back_vec.op, back_vec.n + 1));
-    }
-    else{
-      last_op = next_op;
-      opList.push_back(next_op);
-    }
-    if(bit_count(next_dir) == 2) last_dir = next_dir - (last_dir & next_dir);
-  }
-
-  /* TASK
-   * TO CONSIDER DIAGONAL GOAL
-   *
-   * */
-  /*
-  auto fake_queue = dir_list.back();
-  dir_list.push_back(fake_queue);
-  dir_list.push_back(fake_queue);
-  dir_list.push_back(fake_queue);
-  OperationList opList;
-  Operation present_op(Operation::FORWARD);
-  for(size_t i = 0;  i < dir_list.size(); i++){
-    if(i < dir_list.size() - 3){
-      Direction present_dir = dir_list[i];
-      Direction next_dir = dir_list[i+1];
-      Direction future_dir = dir_list[i+2];
-      Operation next_op = nextOperation(present_op, present_dir, next_dir, future_dir);
-      if(present_op.op == Operation::FORWARD && next_op.op == Operation::FORWARD){
+  if(use_diagonal == false){
+    for(auto itr = dir_list.begin(); itr != dir_list.end(); itr++){
+      const Direction next_dir = *itr;
+      auto next_op = nextOperation(last_dir, next_dir);
+      if(last_op.op == Operation::FORWARD && next_op.op == Operation::FORWARD){
         auto back_vec = opList.back();
         opList.pop_back();
         opList.push_back(Operation(back_vec.op, back_vec.n + 1));
       }
       else{
-        present_op = next_op;
+        last_op = next_op;
         opList.push_back(next_op);
       }
+      if(bit_count(next_dir) == 2) last_dir = next_dir - (last_dir & next_dir);
     }
   }
-  */
+  else{
+    auto rad_list = generate_degree_diff_list(dir_list);
+    int16_t degree_sum = 0;
+    for(auto itr = rad_list.begin();itr != rad_list.end(); itr++){
+      degree_sum += *itr;
+      Operation next_op;
+      if(*itr == 0){
+        next_op = (degree_sum % 2 == 0) ? Operation(Operation::FORWARD) : Operation(Operation::FORWARD_DIAG);
+        if(last_op.op == next_op.op){
+          next_op = opList.back();
+          next_op.n++;
+          opList.pop_back();
+        }
+        opList.push_back(next_op);
+      }
+      else{
+        auto present_rad = *itr;
+        bool flag = false;
+        auto start_rad = *itr;
+        while(itr != rad_list.end()){
+          itr++;
+          if((start_rad > 0 && *itr <= 0) || (start_rad < 0 && *itr >= 0)){
+            itr--;
+            break;
+          }
+          if(degree_sum % 2 == 0){
+            itr--;
+            break;
+          }
+          present_rad += *itr;
+          degree_sum += *itr;
+        }
+        if(last_op.op == Operation::FORWARD_DIAG){
+          if(last_op.n == 1)  opList.pop_back();
+          else{
+            auto back_vec = opList.back();
+            opList.pop_back();
+            opList.push_back(Operation(back_vec.op, back_vec.n - 1));
+          }
+        }
+        if(present_rad > 0){
+          if(present_rad == 1) next_op.op = Operation::TURN_LEFT45;
+          else if(present_rad == 2) next_op.op = (degree_sum % 2 == 0) ? Operation::TURN_LEFT90 : Operation::V_LEFT90;
+          else if(present_rad == 3) next_op.op = Operation::TURN_LEFT135;
+          else if(present_rad == 4) next_op.op = Operation::TURN_LEFT180;
+        }
+        else{
+          if(present_rad == -1) next_op.op = Operation::TURN_RIGHT45;
+          else if(present_rad == -2) next_op.op = (degree_sum % 2 == 0) ? Operation::TURN_RIGHT90 : Operation::V_RIGHT90;
+          else if(present_rad == -3) next_op.op = Operation::TURN_RIGHT135;
+          else if(present_rad == -4) next_op.op = Operation::TURN_RIGHT180;
+        }
+        opList.push_back(next_op);
+      }
+      if(itr == rad_list.end()) break;
+      //printf("degree sum %d *itr %d\n", degree_sum, *itr);
+      last_op = next_op;
+    }
+  }
   return opList;
+}
+std::vector<int16_t> generate_degree_diff_list(std::vector<Direction> dir_list){
+  std::vector<int16_t> degree_list;
+  degree_list.reserve(dir_list.size());
+  Direction FIRST_DIR = NORTH;
+  Direction present_dir, last_dir;
+  last_dir = FIRST_DIR;
+  for(auto itr = dir_list.begin(); itr != dir_list.end(); itr++){
+    present_dir = *itr;
+    if(present_dir == last_dir) degree_list.push_back(0);
+    else{
+      Operation tmp_op = get_turn_direction(last_dir, present_dir);
+      int16_t val = (tmp_op.op == Operation::TURN_RIGHT) ? -1 : 1;
+      if(bit_count(present_dir) == 2 && bit_count(last_dir) == 2) val *= 2;
+      degree_list.push_back(val);
+    }
+    //printf("last_dir 0x%x present_dir 0x%x rad 0x%d\n", last_dir.byte, present_dir.byte, degree_list.back());
+    last_dir = present_dir;
+  }
+  return degree_list;
+}
+Operation get_turn_direction(const Direction& last_dir, const Direction& present_dir){
+  Operation op;
+  Direction first_dir, second_dir;
+  if(bit_count(last_dir) == 1){
+    first_dir = last_dir;
+    second_dir = present_dir - last_dir;
+  }
+  if(bit_count(last_dir) == 2){
+    if(bit_count(present_dir) == 1){
+      first_dir = present_dir - last_dir;
+      second_dir = present_dir;
+    }
+    else{
+      first_dir = last_dir & present_dir;
+      second_dir = present_dir - first_dir;
+    }
+  }
+  if(first_dir > second_dir){
+    if(first_dir == SOUTH && second_dir == EAST)  op.op = Operation::TURN_LEFT;
+    else op.op = Operation::TURN_RIGHT;
+  }
+  else{
+    if(first_dir == EAST && second_dir == SOUTH)  op.op = Operation::TURN_RIGHT;
+    else op.op = Operation::TURN_LEFT;
+  }
+  return op;
 }
 std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
   NodeIndex last_node = node_queue.top();
@@ -78,48 +156,6 @@ Operation nextOperation(const Direction &last_dir, const Direction &present_dir)
   Direction first_dir = (last_dir & present_dir);
   Direction second_dir = present_dir - first_dir;
   Operation return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_90);
-  return return_op;
-}
-
-Operation nextOperation(Operation present_op, Direction present_dir, Direction next_dir, Direction future_dir, bool diagonal){
-  Operation return_op;
-  //printf("present dir is 0x%x\n", present_dir);
-  //printf("next dir is 0x%x\n", next_dir);
-  //printf("future dir is 0x%x\n", future_dir);
-  //FORWARD
-  if(((present_dir | future_dir) == next_dir) || ((present_dir ==  next_dir) && bit_count(present_dir) == 1)){
-    return_op = Operation(Operation::FORWARD, 1);
-    //printf("FORWARD\n");
-  }
-  else{
-    //TURN START
-    if(present_op.op == Operation::FORWARD || present_op.op == Operation::BACK_180){
-      //TURN 90
-      if(bit_count(present_dir & next_dir) == 1 || diagonal == false){
-        //printf("TURN_90\n");
-        //New solution!!!!!!!!!!!!!1
-        //Direction first_dir = present_dir - next_dir;
-        //Direction second_dir = present_dir & next_dir;
-        Direction first_dir = present_dir - (present_dir & next_dir);
-        Direction second_dir = present_dir - first_dir;
-        return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_90);
-      }
-      //TURN 135
-      else if(next_dir == future_dir){
-        //printf("TURN_135\n");
-        Direction second_dir = present_dir & next_dir;
-        Direction first_dir = present_dir - second_dir;
-        return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_135);
-      }
-      //TURN180
-      else{
-        //printf("TURN_180\n");
-        Direction second_dir = present_dir & next_dir;
-        Direction first_dir = present_dir - second_dir;
-        return_op = getTurnOperation(first_dir, second_dir, Operation::TURN_180);
-      }
-    }
-  }
   return return_op;
 }
 
@@ -173,10 +209,10 @@ void print_operation(OperationList runSequence){
     else if(runSequence[i].op == Operation::TURN_RIGHT135) printf("TURN_RIGHT135");
     else if(runSequence[i].op == Operation::TURN_RIGHT180) printf("TURN_RIGHT180");
     else if(runSequence[i].op == Operation::TURN_LEFT135 ) printf("TURN_LEFT135");
-    else if(runSequence[i].op == Operation::TURN_LEFT180 ) printf("TURN_LEFT135");
+    else if(runSequence[i].op == Operation::TURN_LEFT180 ) printf("TURN_LEFT180");
     else if(runSequence[i].op == Operation::TURN_RIGHT90S) printf("TURN_RIGHT90S");
     else if(runSequence[i].op == Operation::TURN_LEFT90S ) printf("TURN_LEFT90S");
-    else if(runSequence[i].op == Operation::V_RIGHT90     ) printf("LEFT_V90");
+    else if(runSequence[i].op == Operation::V_LEFT90     ) printf("LEFT_V90");
     else if(runSequence[i].op == Operation::V_RIGHT90    ) printf("RIGHT_V90");
     else if(runSequence[i].op == Operation::TURN_135     ) printf("TURN_135");
     else if(runSequence[i].op == Operation::V_90) printf("V90");
@@ -206,7 +242,7 @@ int32_t calc_id_from_operation(const int32_t& currentID, const Direction& dir, c
     else if(dir == WEST)  return currentID - 1 - MAZE_SIZE * 2;
   }
   //if nothing
-  printf("error\n");
+  printf("error!\n");
   return currentID;
 }
 Direction calc_dir_from_operation(const Direction& dir, const Operation& nextOP){

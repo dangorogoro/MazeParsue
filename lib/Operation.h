@@ -34,6 +34,8 @@ struct Operation {
 		TURN_LEFT90S,
     V_RIGHT90,
     V_LEFT90,
+    TURN_LEFT,
+    TURN_RIGHT,
     TURN_45,
     TURN_90,
     TURN_135,
@@ -83,4 +85,6 @@ void print_operation(Operation op);
 void print_operation(OperationList list);
 int32_t calc_id_from_operation(const int32_t& currentID, const Direction& dir, const Operation& nextOP);
 Direction calc_dir_from_operation(const Direction& dir, const Operation& nextOP);
+std::vector<int16_t> generate_degree_diff_list(std::vector<Direction> dir_list);
+Operation get_turn_direction(const Direction& last_dir, const Direction& present_dir);
 #endif /* OPERATION_H_ */
