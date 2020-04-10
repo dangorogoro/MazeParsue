@@ -5,7 +5,7 @@ INCLUDE := \
 	-Ilib
 OUTPUT_DIR := build
 CPP_SRCS := $(wildcard main.cpp lib/*.cpp tools/genMaze/cppCode/*.cpp)
-CXX_FLAGS := -O1 -g -std=c++17 -Wall
+CXX_FLAGS := -O1 -g -std=c++17 -Wall -Wformat
 
 OBJS := $(patsubst %,$(OUTPUT_DIR)/%, $(CPP_SRCS:.cpp=.o))
 
