@@ -57,7 +57,7 @@ void Maze::printWall(){
         else  std::printf("     ");
       }
 		}
-		std::printf("  |\r\n");
+		std::printf("   |\r\n");
 	}
 	for (uint8_t i=0;i<MAZE_SIZE;i++) {
 		std::printf("------");
@@ -84,7 +84,7 @@ void Maze::printWall(const bool value[MAZE_SIZE][MAZE_SIZE]){
 				if (value[y][x]) std::printf("* ");
 				else std::printf("  ");
 			}
-			else std::printf("   ");
+			else std::printf("  ");
 		}
 		std::printf("|\r\n");
 	}
