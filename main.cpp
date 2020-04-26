@@ -32,20 +32,20 @@ int main(){
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  auto sampleData = alljapan2011x_exp_fin;
-  //auto sampleData = H2019_East;
-  dir = sampleData[0 + 16 * (15 - 1)];
+  //auto sampleData = alljapan2011x_exp_fin;
+  auto sampleData = japan2019hef;
+  dir = sampleData[0 + MAZE_SIZE * (MAZE_SIZE - 1 - 1)];
   agent.futureCalc();
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
   start_chrono = std::chrono::system_clock::now();
   while(1){
 
     po = agent.getNextIndex();
-    dir = sampleData[po.x + 16 *(15 - po.y)];
+    dir = sampleData[po.x + MAZE_SIZE * (MAZE_SIZE - 1 - po.y)];
     //なにかの事前計算
     agent.futureCalc();
     agent.update(po, dir.byte | 0xf0);
-    //usleep(10 * 10 * 1000);
+    usleep(10 * 10 * 1000);
     //maze.printWall(node);
     if(agent.getState() == Agent::FINISHED) break;
 
@@ -53,11 +53,10 @@ int main(){
   end_chrono = std::chrono::system_clock::now();
   double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
   printf("time %lf[ms]\n", time);
-  //node.startEdgeMap(0, GOAL, true);
   node.startFastestMap(0, GOAL, true);
   auto ans_path = node.getPathQueue(0, GOAL);
   maze.printWall(ans_path);
-  maze.printWall(node);
-  //print_operation(loadPath(ans_path,1));
+  //maze.printWall(node);
+  print_operation(loadPath(ans_path, true));
   return 0;
 }
