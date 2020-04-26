@@ -36,12 +36,10 @@ bool Agent::getGoalBankrupt(){
   }
   return false;
 }
-
 void Agent::update(const IndexVec &vec, const Direction &dir){
-  if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   dist = vec;
-  //auto lastOP = nextOP;
   maze->updateWall(vec, dir, false);
+  if(state == Agent::IDLE)  state = Agent::SEARCHING_NOT_GOAL;
   if(node->get_node(presentGoal).get_wall_visible() == true && state != Agent::BACK_TO_START){
     if(state == Agent::SEARCHING_NOT_GOAL){
       while(node->get_node(getGoal()).get_wall_visible() == true){
@@ -49,7 +47,8 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
         if(getGoalSize() == 0)  break;
       }
       if(getGoalSize() == 0){
-        goalSet = node->getUnknownFastestWall(0, GOAL);
+        //goalSet = node->getUnknownFastestWall(0, GOAL);
+        goalSet = future_pattern.get_future_goal();
         state = Agent::SEARCHING_REACHED_GOAL;
       }
     }
@@ -57,7 +56,8 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
       //Care
       if(getGoalBankrupt() == true){
         //printf("New Path\n");
-        goalSet = node->getUnknownFastestWall(0, GOAL);
+        //goalSet = node->getUnknownFastestWall(0, GOAL);
+        goalSet = future_pattern.get_future_goal();
       }
       else deleteGoal(presentGoal);
       if(getGoalSize() == 0){
@@ -67,9 +67,6 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     }
   }
   //determinedFutureCalc();
-  /////
-  //futureCalc();
-  /////
   //maze->printWall(currentID, goalSet);
   drawFuture(dir);
 
@@ -213,6 +210,8 @@ void Agent::futureCalc(){
     nodeInfoQueue.pop();
     lastStateQueue.pop();
   }
+
+  future_pattern.set_future_goal(node->getUnknownFastestWall(0, GOAL));
   foresightFlag = true;
   //printf("nextID %d\n", currentID);
 }
@@ -247,6 +246,7 @@ void Agent::drawFuture(const Direction &dir){
 void futurePattern::push(const Direction &wall, const Operation &op, const int32_t &goal){
   future_pattern.push(patternInfo(wall, op, goal));
 }
+
 /*
 void futurePattern::debug_print(){
   while(!future_pattern.empty()){

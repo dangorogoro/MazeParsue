@@ -37,6 +37,7 @@ struct patternInfo{
 struct futurePattern{
   private:
     std::queue<patternInfo> future_pattern;
+    std::set<int32_t> future_goal;
   public:
     futurePattern(){}
     Operation get_next_operation(const Direction &dir);
@@ -44,6 +45,8 @@ struct futurePattern{
     inline void pop(){future_pattern.pop();}
     inline patternInfo front()const {return future_pattern.front();}
     inline bool empty()const {return future_pattern.empty();}
+    inline void set_future_goal(const std::set<int32_t> &goal_) {future_goal = goal_;}
+    inline std::set<int32_t> get_future_goal()const {return future_goal;}
     void debug_print();
 };
 
