@@ -9,5 +9,6 @@ extern uint8_t taiwan2017f[];
 extern uint8_t taiwan2018cef[];
 extern uint8_t H2019_East[];
 extern uint8_t japan2016eq[];
+extern uint8_t japan2019hef[];
 extern uint8_t alljapan2012_exp_fin[];
 extern uint8_t alljapan2011x_exp_fin[];

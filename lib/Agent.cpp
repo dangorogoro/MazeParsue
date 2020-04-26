@@ -67,7 +67,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     }
   }
   //determinedFutureCalc();
-  //maze->printWall(currentID, goalSet);
+  maze->printWall(currentID, goalSet);
   drawFuture(dir);
 
   if(currentID == 0 && state == Agent::BACK_TO_START){
