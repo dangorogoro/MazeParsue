@@ -21,12 +21,12 @@ constexpr float max_turn_velocity = 700;
 
 
 template<typename Real>
-constexpr Real factorial_impl(std::uint32_t i) noexcept{
+constexpr Real factorial_impl(uint32_t i) noexcept{
   //return i==0 ? 1 : static_cast<Real>(i) * factorial_impl<Real>(i-1);
 }
 
 template<typename Real>
-constexpr Real cost_solve_impl(const std::uint32_t &i, const bool &diagonal) noexcept{
+constexpr Real cost_solve_impl(const uint32_t &i, const bool &diagonal) noexcept{
   float field_length = MAZE_1BLOCK_LENGTH * (i + 1);
   if(diagonal == true) field_length /= sqrt(2.0);
   float offset_time = (max_forward_velocity - max_turn_velocity) / accel * 2;//UP and DOWN
