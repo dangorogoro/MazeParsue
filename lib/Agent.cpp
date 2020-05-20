@@ -67,7 +67,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     }
   }
   //determinedFutureCalc();
-  maze->printWall(currentID, goalSet);
+  //maze->printWall(currentID, goalSet);
   drawFuture(dir);
 
   if(currentID == 0 && state == Agent::BACK_TO_START){
@@ -109,7 +109,7 @@ void Agent::mazePrint(int32_t id){
   maze->printWall(id_queue);
 }
 */
-
+/*
 void Agent::determinedFutureCalc(){
   presentGoal = node->startPureEdgeMap(currentID, goalSet);
   auto node_queue = node->getPathQueue(currentID, presentGoal);
@@ -154,6 +154,7 @@ void Agent::determinedFutureCalc(){
     if(bit_count(next_dir) == 2)  presentRobotDir = next_dir - (presentRobotDir & next_dir);
   }
 }
+*/
 void Agent::futureCalc(){
   std::queue<NodeInfo> nodeInfoQueue;
   std::queue<uint8_t> lastStateQueue;
@@ -161,12 +162,17 @@ void Agent::futureCalc(){
   for(auto i = 0;i < 3;i++){
     auto tmpGoal = node->startPureEdgeMap(currentID, goalSet);
     if(tmpGoal < 0) break;
-    auto node_queue = node->getPathQueue(currentID, tmpGoal);
-    auto dir_list = generateDirectionList(node_queue);
+    auto& index_vector = indexVector;
+    index_vector.clear();
+    node->getPathQueue(currentID, tmpGoal, index_vector);
+    auto dir_list = generateDirectionList(index_vector);
     Direction next_dir = dir_list[0];
 
-    node_queue.pop();
-    auto candidate_node_info = node->get_node(node_queue.top().get_my_id());
+    //node_queue.pop();
+    //auto candidate_node_info = node->get_node(node_queue.top().get_my_id());
+    auto itr = index_vector.begin();
+    itr++;
+    auto candidate_node_info = node->get_node(*itr);
 
     auto tmpNextOP = nextOperation(presentRobotDir, next_dir);
     if(uint8_t(next_dir & presentRobotDir) == 0){
@@ -176,10 +182,10 @@ void Agent::futureCalc(){
     else{
       if(tmpNextOP.op == Operation::FORWARD){
         uint16_t count = 0;
-        while(!node_queue.empty()){
-          node_queue.pop();
+        while(itr != index_vector.end()){
+          itr++;
           count++;
-          auto top_node_info = node->get_node(node_queue.top().get_my_id());
+          auto top_node_info = node->get_node(*itr);
           if(count >= dir_list.size()){
             break;
           }

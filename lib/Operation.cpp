@@ -2,8 +2,8 @@
 #include <cstdio>
 #include "Operation.h"
 
-OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
-  std::vector<Direction> dir_list = generateDirectionList(node_queue);
+OperationList loadPath(const GeneralIndexVector &index_vector, bool use_diagonal){
+  std::vector<Direction> dir_list = generateDirectionList(index_vector);
 
   OperationList opList;
   Direction last_dir = NORTH;
@@ -42,7 +42,6 @@ OperationList loadPath(NodeQueue<NodeIndex> node_queue, bool use_diagonal){
       }
       else{
         auto present_rad = *itr;
-        bool flag = false;
         auto start_rad = *itr;
         while(itr != rad_list.end()){
           itr++;
@@ -133,19 +132,20 @@ Operation get_turn_direction(const Direction& last_dir, const Direction& present
   }
   return op;
 }
-std::vector<Direction> generateDirectionList(NodeQueue<NodeIndex> node_queue){
-  NodeIndex last_node = node_queue.top();
+std::vector<Direction> generateDirectionList(const GeneralIndexVector& index_vector){
   std::vector<Direction> dir_list;
-  node_queue.pop();
-  while(!node_queue.empty()){
+  dir_list.reserve(64);
+  auto itr = index_vector.begin();
+  auto last_id = *itr;
+  itr++;
+  for(; itr != index_vector.end(); itr++){
     //printf("last_node id is %d\n", last_node.get_my_id());
-    NodeIndex present_node = node_queue.top();
+    auto present_id = *itr;
     //printf("present_node id is %d\n", present_node.get_my_id());
-    Direction dir = node_relation(last_node.get_my_id(), present_node.get_my_id());
+    Direction dir = node_relation(last_id, present_id);
     //printf("dir is 0x%x\n", dir);
     dir_list.push_back(dir);
-    last_node = present_node;
-    node_queue.pop();
+    last_id = present_id;
   }
   return dir_list;
 }
@@ -218,6 +218,7 @@ void print_operation(OperationList runSequence){
     else if(runSequence[i].op == Operation::V_90) printf("V90");
     else if(runSequence[i].op == Operation::TURN_45) printf("TURN_45");
     else if(runSequence[i].op == Operation::BACK_180) printf("BACK_180");
+    else printf("wrong!");
     printf(" -> %d\n", runSequence[i].n);
   }
 }

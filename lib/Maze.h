@@ -11,6 +11,7 @@
 #include <iterator>
 #include <chrono>
 #include <algorithm>
+#include "Utility.h"
 #include "Parsue_Conf.h"
 #include "Cost.h"
 
@@ -329,7 +330,7 @@ class Node{
         node[i].edgeVec.clear();
       }
     }
-    NodeQueue<NodeIndex> getPathQueue(const int32_t& start_id, const int32_t& end_id);
+    void getPathQueue(const int32_t& start_id, const int32_t& end_id, GeneralIndexVector &index_vector);
     void updateNodeIndex(NodeIndex target_node, bool force_flag = false);
     void updateNodeIndex(NodeQueue<NodeIndex> node_queue, bool force_flag = false);
     NodeQueue<NodeIndex> expandQueue(NodeQueue<NodeIndex> src_queue, NodeQueue<NodeIndex>dst_queue);

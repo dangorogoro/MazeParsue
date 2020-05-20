@@ -383,28 +383,24 @@ int32_t Node::startFastestMap(const int32_t &start_id, const int32_t &end_id, bo
   return startFastestMap(start_id, id_set, visible);
 }
 
-NodeQueue<NodeIndex> Node::getPathQueue(const int32_t& start_id, const int32_t& end_id){
-  NodeQueue<NodeIndex> node_queue;
-  node_queue.push(NodeIndex(node, end_id));
+void Node::getPathQueue(const int32_t& start_id, const int32_t& end_id, GeneralIndexVector &index_vector){
+  index_vector.push_back(end_id);
   auto po = get_node(end_id).get_mother_id();
   while(1){
-    //printf("mother id is %d\n", po);
-    node_queue.push(NodeIndex(node, po));
+    index_vector.push_back(po);
     if(po == start_id) break;
     po = get_node(po).get_mother_id();
   }
-  return node_queue;
+  index_vector.reverse();
 }
 std::set<int32_t> Node::getUnknownFastestWall(const int32_t &start_id, const int32_t &end_id){
-  //startEdgeMap(start_id, end_id);
   startFastestMap(start_id, end_id);
-  auto path_queue = getPathQueue(start_id, end_id);
+  auto& index_vector = indexVector;
+  index_vector.clear();
+  getPathQueue(start_id, end_id, index_vector);
   std::set<int32_t> check_set;
-  while(!path_queue.empty()){
-    NodeIndex top_node = path_queue.top();
-    int32_t top_id = top_node.get_my_id();
+  for(auto top_id : index_vector){
     if(node[top_id].get_wall_visible() == false)  check_set.insert(top_id);
-    path_queue.pop();
   }
   return check_set;
 }
