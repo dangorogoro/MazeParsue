@@ -248,6 +248,14 @@ void Maze::printWall(std::priority_queue<int32_t> id_queue){
 	}
 	std::printf("+\r\n");
 }
+void Maze::printWall(const GeneralIndexVector& indexVector){
+  std::priority_queue<int32_t> id_queue;
+  for(auto itr = indexVector.begin(); itr != indexVector.end(); itr++){
+    id_queue.push(*itr);
+  }
+  printWall(id_queue);
+}
+/*
 void Maze::printWall(NodeQueue<NodeIndex> node_queue){
   std::priority_queue<int32_t> id_queue;
   while(!node_queue.empty()){
@@ -256,9 +264,7 @@ void Maze::printWall(NodeQueue<NodeIndex> node_queue){
   }
   printWall(id_queue);
 }
-
-  
-  
+*/
 void Maze::loadFromArray(uint8_t* array){
   uint32_t data_size = 256;
   for(size_t i = 0; i < data_size; i++){

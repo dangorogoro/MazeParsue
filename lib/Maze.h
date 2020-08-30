@@ -232,6 +232,7 @@ class Maze{
       id_queue.push(id);
       printWall(id_queue, goal_set);
     }
+    void printWall(const GeneralIndexVector& indexVector);
     void loadFromArray(uint8_t* array);
     void clear(){
       wall_pointer->reset();
