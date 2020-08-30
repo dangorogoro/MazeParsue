@@ -4,6 +4,7 @@
 #include "Agent.h"
 #include "Operation.h"
 
+
 //std::set<int32_t> GOAL_LIST{64 * 7 + 2 * 7, 64 * 7 + 2 * 7 + 1, 64 * 7 + 2 * 8 + 1, 64 * 7 + 2 * 8};
 std::set<int32_t> GOAL_LIST{GOAL, GOAL + 2};
 //状態をIDLEにし、path関連を全てクリアする
@@ -67,7 +68,7 @@ void Agent::update(const IndexVec &vec, const Direction &dir){
     }
   }
   //determinedFutureCalc();
-  //maze->printWall(currentID, goalSet);
+  maze->printWall(currentID, goalSet);
   drawFuture(dir);
 
   if(currentID == 0 && state == Agent::BACK_TO_START){

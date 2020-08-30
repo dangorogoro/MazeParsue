@@ -32,8 +32,9 @@ int main(){
   Agent agent(maze, node);
   IndexVec po;
   Direction dir;
-  //auto sampleData = alljapan2011x_exp_fin;
-  auto sampleData = japan2019hef;
+  auto sampleData = H2020_student_half;
+  //auto sampleData = japan2019hef;
+  //auto sampleData = maze_2017_all_final_half;
   dir = sampleData[0 + MAZE_SIZE * (MAZE_SIZE - 1 - 1)];
   agent.futureCalc();
   agent.update(IndexVec(0,1), dir.byte | 0xf0);
@@ -45,7 +46,7 @@ int main(){
     //なにかの事前計算
     agent.futureCalc();
     agent.update(po, dir.byte | 0xf0);
-    usleep(10 * 10 * 1000);
+    usleep(7 * 10 * 1000);
     //maze.printWall(node);
     if(agent.getState() == Agent::FINISHED) break;
 
@@ -54,9 +55,13 @@ int main(){
   double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end_chrono - start_chrono).count() / 1000.0);
   printf("time %lf[ms]\n", time);
   node.startFastestMap(0, GOAL, true);
-  auto ans_path = node.getPathQueue(0, GOAL);
+
+  //Calculate Fastest path and operation
+  auto& ans_path = indexVector;
+  ans_path.clear();
+  node.getPathQueue(0, GOAL, ans_path);
   maze.printWall(ans_path);
-  //maze.printWall(node);
-  print_operation(loadPath(ans_path, true));
+  maze.printWall(node);
+  //print_operation(loadPath(ans_path, true));
   return 0;
 }
